@@ -35,9 +35,7 @@ export const AssignmentEditorModal: React.FC<AssignmentEditorModalProps> = ({
   const [courseCode, setCourseCode] = useState<AssignmentFormData["courseCode"]>(
     initialData?.courseCode || "DSP",
   );
-  const [experimentId, setExperimentId] = useState<string>(
-    initialData?.experimentId || "DSP-01",
-  );
+  const [experimentId, setExperimentId] = useState<string>(initialData?.experimentId || "DSP-01");
   const [title, setTitle] = useState<string>(
     initialData?.title || "Lab Assignment: DFT & Spectral Analysis",
   );
@@ -54,13 +52,9 @@ export const AssignmentEditorModal: React.FC<AssignmentEditorModalProps> = ({
       : new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString().slice(0, 16),
   );
   const [allowLate, setAllowLate] = useState<boolean>(initialData?.allowLate ?? false);
-  const [allowResubmit, setAllowResubmit] = useState<boolean>(
-    initialData?.allowResubmit ?? true,
-  );
+  const [allowResubmit, setAllowResubmit] = useState<boolean>(initialData?.allowResubmit ?? true);
   const [maxMarks, setMaxMarks] = useState<number>(initialData?.maxMarks || 100);
-  const [status, setStatus] = useState<"draft" | "published">(
-    initialData?.status || "published",
-  );
+  const [status, setStatus] = useState<"draft" | "published">(initialData?.status || "published");
   const [starterCodeOverride, setStarterCodeOverride] = useState<string>(
     initialData?.starterCodeOverride || "",
   );
@@ -261,7 +255,9 @@ export const AssignmentEditorModal: React.FC<AssignmentEditorModalProps> = ({
           {/* Due Date & Submission Controls */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block font-medium text-fg mb-1">Submission Deadline (Due Date)</label>
+              <label className="block font-medium text-fg mb-1">
+                Submission Deadline (Due Date)
+              </label>
               <input
                 type="datetime-local"
                 value={dueAt}

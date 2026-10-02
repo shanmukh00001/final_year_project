@@ -198,11 +198,12 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
             <div className="rounded-xl border-2 border-dashed border-line hover:border-brand bg-surface-2/40 p-6 text-center transition flex flex-col items-center justify-center space-y-3">
               <FileSpreadsheet className="h-10 w-10 text-brand stroke-1" />
               <div>
-                <p className="font-semibold text-xs text-fg">
-                  Upload CSV file or drop it here
-                </p>
+                <p className="font-semibold text-xs text-fg">Upload CSV file or drop it here</p>
                 <p className="text-[11px] text-fg-subtle mt-0.5">
-                  Expected columns: <code className="font-mono text-brand">rollNumber, fullName, email, courseCode, section</code>
+                  Expected columns:{" "}
+                  <code className="font-mono text-brand">
+                    rollNumber, fullName, email, courseCode, section
+                  </code>
                 </p>
               </div>
 

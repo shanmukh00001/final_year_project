@@ -50,4 +50,3 @@ The complete technical and academic product suite of **V-Lab ECE** (CPython 3.12
 - [x] **Milestone 2:** Faculty Portal with assignment creation modal, student submission modal in workspace, side-by-side submission review with rubrics grading, and CSV export.
 - [x] **Milestone 3:** Admin Console with system vitals, audit logging, bulk CSV student roster importer, RBAC user promotion/demotion, and DIP interactive canvas image inspector.
 - [x] **Milestone 4:** AST-normalized Winnowing code similarity engine ($k=8, w=4$), pairwise Jaccard similarity matrix API endpoint, academic integrity warning banners, and 100% test coverage.
-

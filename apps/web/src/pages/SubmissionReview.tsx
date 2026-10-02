@@ -28,12 +28,14 @@ export interface StudentSubmission {
   code: string;
   stdout: string;
   plotCoordinates?: { x: number[]; y: number[]; title?: string } | undefined;
-  grade?: {
-    marks: number;
-    feedback: string;
-    gradedAt: string;
-    gradedBy: string;
-  } | undefined;
+  grade?:
+    | {
+        marks: number;
+        feedback: string;
+        gradedAt: string;
+        gradedBy: string;
+      }
+    | undefined;
 }
 
 interface SubmissionReviewProps {
@@ -83,7 +85,8 @@ vlab.plot(freqs[:N//2], magnitude_db[:N//2], label="Magnitude (dB)", title="FFT 
     },
     grade: {
       marks: 95,
-      feedback: "Excellent spectral analysis. Windowing applied correctly with minimal side-lobe leakage.",
+      feedback:
+        "Excellent spectral analysis. Windowing applied correctly with minimal side-lobe leakage.",
       gradedAt: new Date().toISOString(),
       gradedBy: "Prof. Rao",
     },
@@ -143,15 +146,10 @@ vlab.plot(np.arange(len(X)), np.abs(X), title="Raw DFT")
   },
 ];
 
-export const SubmissionReview: React.FC<SubmissionReviewProps> = ({
-  assignment,
-  onBack,
-}) => {
+export const SubmissionReview: React.FC<SubmissionReviewProps> = ({ assignment, onBack }) => {
   const [submissions, setSubmissions] = useState<StudentSubmission[]>(INITIAL_SUBMISSIONS);
   const [selectedSubIndex, setSelectedSubIndex] = useState<number>(0);
-  const [scoreInput, setScoreInput] = useState<number>(
-    INITIAL_SUBMISSIONS[0]?.grade?.marks || 90,
-  );
+  const [scoreInput, setScoreInput] = useState<number>(INITIAL_SUBMISSIONS[0]?.grade?.marks || 90);
   const [feedbackInput, setFeedbackInput] = useState<string>(
     INITIAL_SUBMISSIONS[0]?.grade?.feedback || "",
   );
@@ -257,9 +255,7 @@ export const SubmissionReview: React.FC<SubmissionReviewProps> = ({
           <span className="rounded bg-brand/10 px-2 py-0.5 font-mono text-[11px] font-bold text-brand">
             {assignment.courseCode} · {assignment.experimentId}
           </span>
-          <h1 className="text-xs font-semibold text-fg truncate max-w-md">
-            {assignment.title}
-          </h1>
+          <h1 className="text-xs font-semibold text-fg truncate max-w-md">{assignment.title}</h1>
         </div>
 
         <div className="flex items-center gap-3">
@@ -310,7 +306,9 @@ export const SubmissionReview: React.FC<SubmissionReviewProps> = ({
                     {sub.status === "graded" ? (
                       <span className="flex items-center gap-1 text-[11px] text-green-500 font-mono font-medium">
                         <CheckCircle className="h-3 w-3" />
-                        <span>{sub.grade?.marks}/{assignment.maxMarks}</span>
+                        <span>
+                          {sub.grade?.marks}/{assignment.maxMarks}
+                        </span>
                       </span>
                     ) : (
                       <span className="rounded bg-amber-500/10 px-1.5 py-0.5 font-mono text-[10px] text-amber-500 font-medium">
@@ -379,7 +377,9 @@ export const SubmissionReview: React.FC<SubmissionReviewProps> = ({
               <div>
                 <span className="font-semibold text-fg">Code Similarity & Integrity Check</span>
                 <p className="text-[11px] text-fg-subtle">
-                  AST normalization & Winnowing analysis: <strong className="text-green-500">12% match</strong> (Within safe threshold &lt; 80%)
+                  AST normalization & Winnowing analysis:{" "}
+                  <strong className="text-green-500">12% match</strong> (Within safe threshold &lt;
+                  80%)
                 </p>
               </div>
             </div>
@@ -425,7 +425,8 @@ export const SubmissionReview: React.FC<SubmissionReviewProps> = ({
                 {currentSub.plotCoordinates ? (
                   <div className="w-full text-center">
                     <span className="text-[11px] font-mono text-brand font-medium">
-                      {currentSub.plotCoordinates.title || "Plot Output"} ({currentSub.plotCoordinates.x.length} points)
+                      {currentSub.plotCoordinates.title || "Plot Output"} (
+                      {currentSub.plotCoordinates.x.length} points)
                     </span>
                     <div className="mt-2 h-24 w-full flex items-end justify-center gap-1 px-4">
                       {currentSub.plotCoordinates.y.slice(0, 24).map((val, idx) => {

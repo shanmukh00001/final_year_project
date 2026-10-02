@@ -1,26 +1,19 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-  ZoomIn,
-  ZoomOut,
-  Maximize2,
-  BarChart2,
-  Eye,
-} from "lucide-react";
+import { ZoomIn, ZoomOut, Maximize2, BarChart2, Eye } from "lucide-react";
 
 interface ImageInspectorProps {
-  imageData?: {
-    width: number;
-    height: number;
-    data: Uint8ClampedArray | number[][];
-    title?: string | undefined;
-  } | undefined;
+  imageData?:
+    | {
+        width: number;
+        height: number;
+        data: Uint8ClampedArray | number[][];
+        title?: string | undefined;
+      }
+    | undefined;
   theme?: "light" | "dark" | undefined;
 }
 
-export const ImageInspector: React.FC<ImageInspectorProps> = ({
-  imageData,
-  theme: _theme,
-}) => {
+export const ImageInspector: React.FC<ImageInspectorProps> = ({ imageData, theme: _theme }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [hoverPixel, setHoverPixel] = useState<{
@@ -31,9 +24,7 @@ export const ImageInspector: React.FC<ImageInspectorProps> = ({
     g: number;
     b: number;
   } | null>(null);
-  const [colormap, setColormap] = useState<"grayscale" | "viridis" | "plasma" | "hot">(
-    "grayscale",
-  );
+  const [colormap, setColormap] = useState<"grayscale" | "viridis" | "plasma" | "hot">("grayscale");
   const [showHistogram, setShowHistogram] = useState(false);
 
   // Default synthetic test pattern if no image matrix provided (e.g. 128x128 gradient square)
@@ -158,9 +149,7 @@ export const ImageInspector: React.FC<ImageInspectorProps> = ({
             type="button"
             onClick={() => setShowHistogram(!showHistogram)}
             className={`rounded p-1 transition ${
-              showHistogram
-                ? "bg-brand text-white"
-                : "text-fg-muted hover:bg-hover hover:text-fg"
+              showHistogram ? "bg-brand text-white" : "text-fg-muted hover:bg-hover hover:text-fg"
             }`}
             title="Toggle Pixel Intensity Histogram"
           >
@@ -178,7 +167,9 @@ export const ImageInspector: React.FC<ImageInspectorProps> = ({
           >
             <ZoomOut className="h-3 w-3" />
           </button>
-          <span className="font-mono text-[10px] text-fg-subtle">{Math.round(zoomLevel * 100)}%</span>
+          <span className="font-mono text-[10px] text-fg-subtle">
+            {Math.round(zoomLevel * 100)}%
+          </span>
           <button
             type="button"
             onClick={() => setZoomLevel((z) => Math.min(4, z + 0.25))}
@@ -228,7 +219,8 @@ export const ImageInspector: React.FC<ImageInspectorProps> = ({
                 }}
               />
               <span>
-                Val: <strong>{hoverPixel.val}</strong> (RGB: {hoverPixel.r},{hoverPixel.g},{hoverPixel.b})
+                Val: <strong>{hoverPixel.val}</strong> (RGB: {hoverPixel.r},{hoverPixel.g},
+                {hoverPixel.b})
               </span>
             </div>
           </div>

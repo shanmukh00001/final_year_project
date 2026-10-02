@@ -40,13 +40,7 @@ describe("Milestone 3: Admin Console & DIP Image Inspector Suite", () => {
     const handleSuccess = jest.fn();
     const handleClose = jest.fn();
 
-    render(
-      <CsvImportModal
-        isOpen={true}
-        onClose={handleClose}
-        onImportSuccess={handleSuccess}
-      />
-    );
+    render(<CsvImportModal isOpen={true} onClose={handleClose} onImportSuccess={handleSuccess} />);
 
     expect(screen.getByText(/Bulk Student Roster Importer/i)).toBeInTheDocument();
     expect(screen.getByText(/Load 5-Student Sample/i)).toBeInTheDocument();

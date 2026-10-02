@@ -130,9 +130,7 @@ export const AdminDashboard: React.FC = () => {
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
 
   const handleRoleChange = (userId: string, newRole: AdminUser["role"]) => {
-    setUsers((prev) =>
-      prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u)),
-    );
+    setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u)));
     const target = users.find((u) => u.id === userId);
     setAuditLogs((prev) => [
       {
@@ -151,9 +149,7 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const handleToggleActive = (userId: string) => {
-    setUsers((prev) =>
-      prev.map((u) => (u.id === userId ? { ...u, isActive: !u.isActive } : u)),
-    );
+    setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, isActive: !u.isActive } : u)));
   };
 
   const handleImportSuccess = (count: number) => {

@@ -45,58 +45,99 @@ function computeBounds(traces: TraceData[]) {
       const x = xs[i];
       const y = ys[i];
       if (typeof x === "number" && !Number.isNaN(x)) {
-        if (x < minX) { minX = x; }
-        if (x > maxX) { maxX = x; }
+        if (x < minX) {
+          minX = x;
+        }
+        if (x > maxX) {
+          maxX = x;
+        }
         hasData = true;
       }
       if (typeof y === "number" && !Number.isNaN(y)) {
-        if (y < minY) { minY = y; }
-        if (y > maxY) { maxY = y; }
+        if (y < minY) {
+          minY = y;
+        }
+        if (y > maxY) {
+          maxY = y;
+        }
         hasData = true;
       }
     }
   }
 
-  if (!hasData) { return null; }
-  if (minX === maxX) { minX -= 1; maxX += 1; }
-  if (minY === maxY) { minY -= 1; maxY += 1; }
+  if (!hasData) {
+    return null;
+  }
+  if (minX === maxX) {
+    minX -= 1;
+    maxX += 1;
+  }
+  if (minY === maxY) {
+    minY -= 1;
+    maxY += 1;
+  }
   const dx = maxX - minX;
   const dy = maxY - minY;
-  return { minX: minX - dx * 0.02, maxX: maxX + dx * 0.02, minY: minY - dy * 0.05, maxY: maxY + dy * 0.05 };
+  return {
+    minX: minX - dx * 0.02,
+    maxX: maxX + dx * 0.02,
+    minY: minY - dy * 0.05,
+    maxY: maxY + dy * 0.05,
+  };
 }
 
 type Bounds = ReturnType<typeof computeBounds>;
 
 function makeMapper(b: Bounds, pw: number, ph: number, m: { left: number; top: number }) {
   const mapX = (v: number) => {
-    if (!b) { return m.left; }
+    if (!b) {
+      return m.left;
+    }
     return m.left + Math.max(0, Math.min(pw, ((v - b.minX) / (b.maxX - b.minX)) * pw));
   };
   const mapY = (v: number) => {
-    if (!b) { return m.top + ph; }
+    if (!b) {
+      return m.top + ph;
+    }
     return m.top + ph - Math.max(0, Math.min(ph, ((v - b.minY) / (b.maxY - b.minY)) * ph));
   };
   return { mapX, mapY };
 }
 
-function tracePath(traces: TraceData[], b: Bounds, mapX: (v: number) => number, mapY: (v: number) => number, maxPts: number) {
+function tracePath(
+  traces: TraceData[],
+  b: Bounds,
+  mapX: (v: number) => number,
+  mapY: (v: number) => number,
+  maxPts: number,
+) {
   return traces.map((tr, trIdx) => {
     const xs = tr.x || [];
     const ys = tr.y || [];
     const count = Math.min(xs.length, ys.length);
-    if (count < 2) { return null; }
+    if (count < 2) {
+      return null;
+    }
     const step = Math.max(1, Math.floor(count / maxPts));
     const pts: string[] = [];
     for (let i = 0; i < count; i += step) {
-      pts.push(`${i === 0 ? "M" : "L"} ${mapX(xs[i] ?? 0).toFixed(1)} ${mapY(ys[i] ?? 0).toFixed(1)}`);
+      pts.push(
+        `${i === 0 ? "M" : "L"} ${mapX(xs[i] ?? 0).toFixed(1)} ${mapY(ys[i] ?? 0).toFixed(1)}`,
+      );
     }
     if ((count - 1) % step !== 0) {
       pts.push(`L ${mapX(xs[count - 1] ?? 0).toFixed(1)} ${mapY(ys[count - 1] ?? 0).toFixed(1)}`);
     }
     return (
-      <path key={tr.name || trIdx} d={pts.join(" ")} fill="none"
+      <path
+        key={tr.name || trIdx}
+        d={pts.join(" ")}
+        fill="none"
         stroke={tr.style?.color || TRACE_PALETTE[trIdx % TRACE_PALETTE.length]}
-        strokeWidth={b ? "2" : "1.5"} strokeLinejoin="round" strokeLinecap="round" />
+        strokeWidth={b ? "2" : "1.5"}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
     );
   });
 }
@@ -116,7 +157,9 @@ export const PlotPane: React.FC<PlotPaneProps> = ({ theme }) => {
   const { mapX, mapY } = useMemo(() => makeMapper(bounds, PLOT_W, PLOT_H, MARGIN), [bounds]);
 
   const handleDownloadFigure = useCallback(() => {
-    if (!activeFigure) { return; }
+    if (!activeFigure) {
+      return;
+    }
     const blob = new Blob([JSON.stringify(activeFigure, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -140,20 +183,67 @@ export const PlotPane: React.FC<PlotPaneProps> = ({ theme }) => {
     return (
       <div
         key={fig.id}
-        onClick={() => { setActiveFigure(fig.id); setGridView(false); }}
+        onClick={() => {
+          setActiveFigure(fig.id);
+          setGridView(false);
+        }}
         className={`flex flex-col rounded border cursor-pointer transition-all hover:shadow-md ${isActive ? "border-brand shadow-sm ring-1 ring-brand/30" : "border-line hover:border-brand/40"} bg-surface p-2`}
       >
-        <p className="font-semibold text-[11px] text-fg truncate mb-1.5">{fig.layout?.title || fig.id}</p>
-        <svg className="w-full h-auto" viewBox={`0 0 ${MINI_W} ${MINI_H}`} preserveAspectRatio="xMidYMid meet">
-          <rect x={MINI_M.left} y={MINI_M.top} width={MINI_PW} height={MINI_PH} fill={gridBg} stroke={gridStroke} strokeWidth="1" />
+        <p className="font-semibold text-[11px] text-fg truncate mb-1.5">
+          {fig.layout?.title || fig.id}
+        </p>
+        <svg
+          className="w-full h-auto"
+          viewBox={`0 0 ${MINI_W} ${MINI_H}`}
+          preserveAspectRatio="xMidYMid meet"
+        >
+          <rect
+            x={MINI_M.left}
+            y={MINI_M.top}
+            width={MINI_PW}
+            height={MINI_PH}
+            fill={gridBg}
+            stroke={gridStroke}
+            strokeWidth="1"
+          />
           {b && tracePath(fig.traces, b, mX, mY, 250)}
-          <line x1={MINI_M.left} y1={MINI_M.top} x2={MINI_M.left} y2={MINI_M.top + MINI_PH} stroke={axisStroke} strokeWidth="1" />
-          <line x1={MINI_M.left} y1={MINI_M.top + MINI_PH} x2={MINI_M.left + MINI_PW} y2={MINI_M.top + MINI_PH} stroke={axisStroke} strokeWidth="1" />
-          {fig.layout?.xLabel && <text x={MINI_M.left + MINI_PW / 2} y={MINI_H - 4} textAnchor="middle" fontSize="9" fill={labelFill}>{fig.layout.xLabel}</text>}
+          <line
+            x1={MINI_M.left}
+            y1={MINI_M.top}
+            x2={MINI_M.left}
+            y2={MINI_M.top + MINI_PH}
+            stroke={axisStroke}
+            strokeWidth="1"
+          />
+          <line
+            x1={MINI_M.left}
+            y1={MINI_M.top + MINI_PH}
+            x2={MINI_M.left + MINI_PW}
+            y2={MINI_M.top + MINI_PH}
+            stroke={axisStroke}
+            strokeWidth="1"
+          />
+          {fig.layout?.xLabel && (
+            <text
+              x={MINI_M.left + MINI_PW / 2}
+              y={MINI_H - 4}
+              textAnchor="middle"
+              fontSize="9"
+              fill={labelFill}
+            >
+              {fig.layout.xLabel}
+            </text>
+          )}
         </svg>
         <div className="flex items-center justify-between mt-1">
-          <span className="text-[10px] text-fg-subtle font-mono">{fig.traces.length} trace · {fig.traces.reduce((a, t) => a + (t.x?.length || 0), 0)} pts</span>
-          {isActive && <span className="text-[9px] font-semibold text-brand uppercase tracking-wider">active</span>}
+          <span className="text-[10px] text-fg-subtle font-mono">
+            {fig.traces.length} trace · {fig.traces.reduce((a, t) => a + (t.x?.length || 0), 0)} pts
+          </span>
+          {isActive && (
+            <span className="text-[9px] font-semibold text-brand uppercase tracking-wider">
+              active
+            </span>
+          )}
         </div>
       </div>
     );
@@ -210,7 +300,9 @@ export const PlotPane: React.FC<PlotPaneProps> = ({ theme }) => {
               type="button"
               onClick={() => setGridView(!gridView)}
               className={`flex items-center gap-1 rounded px-2 py-1 text-[11px] transition ${
-                gridView ? "bg-brand text-white font-medium" : "text-fg-muted hover:bg-hover hover:text-fg"
+                gridView
+                  ? "bg-brand text-white font-medium"
+                  : "text-fg-muted hover:bg-hover hover:text-fg"
               }`}
               title={gridView ? "Back to single figure view" : "Grid view — see all plots at once"}
             >
@@ -226,7 +318,9 @@ export const PlotPane: React.FC<PlotPaneProps> = ({ theme }) => {
                 data-testid="btn-toggle-datatable"
                 onClick={() => setShowDataTable(!showDataTable)}
                 className={`flex items-center gap-1 rounded px-2 py-1 text-[11px] transition ${
-                  showDataTable ? "bg-brand text-white font-medium" : "text-fg-muted hover:bg-hover hover:text-fg"
+                  showDataTable
+                    ? "bg-brand text-white font-medium"
+                    : "text-fg-muted hover:bg-hover hover:text-fg"
                 }`}
                 title="Toggle Data Table View (AC-PLT-007)"
               >
@@ -255,25 +349,32 @@ export const PlotPane: React.FC<PlotPaneProps> = ({ theme }) => {
             <Activity className="h-10 w-10 stroke-1 mb-2 opacity-40 text-brand" />
             <p className="font-medium text-sm text-fg-muted">No Figures Generated</p>
             <p className="text-xs max-w-xs mt-1">
-              Call <code className="font-mono text-brand">vlab.plot(x, y)</code> in your Python script to visualize waveforms, or{" "}
-              <code className="font-mono text-brand">vlab.plot(x, y, title=&quot;…&quot;)</code> to create multiple named figures.
+              Call <code className="font-mono text-brand">vlab.plot(x, y)</code> in your Python
+              script to visualize waveforms, or{" "}
+              <code className="font-mono text-brand">vlab.plot(x, y, title=&quot;…&quot;)</code> to
+              create multiple named figures.
             </p>
           </div>
-
         ) : gridView ? (
           /* ── Grid view: all figures side-by-side ── */
           <div data-testid="plot-grid-view" className="flex-1 w-full min-h-0 overflow-y-auto">
             <div
               className="grid gap-3"
-              style={{ gridTemplateColumns: figures.length === 1 ? "1fr" : "repeat(2, minmax(0,1fr))" }}
+              style={{
+                gridTemplateColumns: figures.length === 1 ? "1fr" : "repeat(2, minmax(0,1fr))",
+              }}
             >
-              {figures.map((fig) => renderMiniCard(fig, (activeFigureId || figures[0]?.id) === fig.id))}
+              {figures.map((fig) =>
+                renderMiniCard(fig, (activeFigureId || figures[0]?.id) === fig.id),
+              )}
             </div>
           </div>
-
         ) : showDataTable ? (
           /* ── Data Table (AC-PLT-007) ── */
-          <div data-testid="plot-data-table" className="flex-1 w-full min-h-0 overflow-auto text-xs font-mono">
+          <div
+            data-testid="plot-data-table"
+            className="flex-1 w-full min-h-0 overflow-auto text-xs font-mono"
+          >
             <table className="w-full border-collapse border border-line text-left">
               <thead>
                 <tr className="bg-surface-2 border-b border-line text-fg-muted font-semibold sticky top-0">
@@ -290,20 +391,23 @@ export const PlotPane: React.FC<PlotPaneProps> = ({ theme }) => {
                     return (
                       <tr key={idx} className="border-b border-line hover:bg-hover">
                         <td className="p-2 border-r border-line text-fg-subtle">{idx}</td>
-                        <td className="p-2 border-r border-line">{typeof x === "number" ? x.toFixed(4) : String(x)}</td>
+                        <td className="p-2 border-r border-line">
+                          {typeof x === "number" ? x.toFixed(4) : String(x)}
+                        </td>
                         <td className="p-2">{typeof y === "number" ? y.toFixed(4) : String(y)}</td>
                       </tr>
                     );
                   })
                 ) : (
                   <tr>
-                    <td colSpan={3} className="p-3 text-center text-fg-subtle">No trace coordinates available</td>
+                    <td colSpan={3} className="p-3 text-center text-fg-subtle">
+                      No trace coordinates available
+                    </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
-
         ) : (
           /* ── Single active figure SVG canvas ── */
           <div
@@ -320,7 +424,10 @@ export const PlotPane: React.FC<PlotPaneProps> = ({ theme }) => {
                   <span key={tr.name || idx} className="flex items-center gap-1">
                     <span
                       className="inline-block w-2.5 h-2.5 rounded-full"
-                      style={{ backgroundColor: tr.style?.color || TRACE_PALETTE[idx % TRACE_PALETTE.length] }}
+                      style={{
+                        backgroundColor:
+                          tr.style?.color || TRACE_PALETTE[idx % TRACE_PALETTE.length],
+                      }}
                     />
                     {tr.name || `Trace ${idx + 1}`}
                   </span>
@@ -337,19 +444,41 @@ export const PlotPane: React.FC<PlotPaneProps> = ({ theme }) => {
                 preserveAspectRatio="xMidYMid meet"
               >
                 {/* Plot area background */}
-                <rect x={MARGIN.left} y={MARGIN.top} width={PLOT_W} height={PLOT_H}
-                  fill={gridBg} stroke={gridStroke} strokeWidth="1" />
+                <rect
+                  x={MARGIN.left}
+                  y={MARGIN.top}
+                  width={PLOT_W}
+                  height={PLOT_H}
+                  fill={gridBg}
+                  stroke={gridStroke}
+                  strokeWidth="1"
+                />
 
                 {/* Horizontal gridlines + Y labels */}
                 {[0, 0.25, 0.5, 0.75, 1.0].map((frac) => {
                   const yPos = MARGIN.top + PLOT_H * frac;
-                  const yVal = bounds ? bounds.maxY - frac * (bounds.maxY - bounds.minY) : 1 - frac * 2;
+                  const yVal = bounds
+                    ? bounds.maxY - frac * (bounds.maxY - bounds.minY)
+                    : 1 - frac * 2;
                   return (
                     <g key={frac}>
-                      <line x1={MARGIN.left} y1={yPos} x2={MARGIN.left + PLOT_W} y2={yPos}
-                        stroke={gridLine} strokeDasharray={frac === 0.5 ? "none" : "2 2"} strokeWidth="1" />
-                      <text x={MARGIN.left - 8} y={yPos + 4} textAnchor="end" fontSize="10"
-                        fontFamily="monospace" fill={labelFill}>
+                      <line
+                        x1={MARGIN.left}
+                        y1={yPos}
+                        x2={MARGIN.left + PLOT_W}
+                        y2={yPos}
+                        stroke={gridLine}
+                        strokeDasharray={frac === 0.5 ? "none" : "2 2"}
+                        strokeWidth="1"
+                      />
+                      <text
+                        x={MARGIN.left - 8}
+                        y={yPos + 4}
+                        textAnchor="end"
+                        fontSize="10"
+                        fontFamily="monospace"
+                        fill={labelFill}
+                      >
                         {typeof yVal === "number" ? yVal.toPrecision(3) : yVal}
                       </text>
                     </g>
@@ -362,10 +491,23 @@ export const PlotPane: React.FC<PlotPaneProps> = ({ theme }) => {
                   const xVal = bounds ? bounds.minX + frac * (bounds.maxX - bounds.minX) : frac;
                   return (
                     <g key={frac}>
-                      <line x1={xPos} y1={MARGIN.top} x2={xPos} y2={MARGIN.top + PLOT_H}
-                        stroke={gridLine} strokeDasharray="2 2" strokeWidth="1" />
-                      <text x={xPos} y={MARGIN.top + PLOT_H + 16} textAnchor="middle" fontSize="10"
-                        fontFamily="monospace" fill={labelFill}>
+                      <line
+                        x1={xPos}
+                        y1={MARGIN.top}
+                        x2={xPos}
+                        y2={MARGIN.top + PLOT_H}
+                        stroke={gridLine}
+                        strokeDasharray="2 2"
+                        strokeWidth="1"
+                      />
+                      <text
+                        x={xPos}
+                        y={MARGIN.top + PLOT_H + 16}
+                        textAnchor="middle"
+                        fontSize="10"
+                        fontFamily="monospace"
+                        fill={labelFill}
+                      >
                         {typeof xVal === "number" ? xVal.toPrecision(3) : xVal}
                       </text>
                     </g>
@@ -376,22 +518,46 @@ export const PlotPane: React.FC<PlotPaneProps> = ({ theme }) => {
                 {bounds && tracePath(traces, bounds, mapX, mapY, 600)}
 
                 {/* Axis lines */}
-                <line x1={MARGIN.left} y1={MARGIN.top} x2={MARGIN.left} y2={MARGIN.top + PLOT_H}
-                  stroke={axisStroke} strokeWidth="1.5" />
-                <line x1={MARGIN.left} y1={MARGIN.top + PLOT_H} x2={MARGIN.left + PLOT_W} y2={MARGIN.top + PLOT_H}
-                  stroke={axisStroke} strokeWidth="1.5" />
+                <line
+                  x1={MARGIN.left}
+                  y1={MARGIN.top}
+                  x2={MARGIN.left}
+                  y2={MARGIN.top + PLOT_H}
+                  stroke={axisStroke}
+                  strokeWidth="1.5"
+                />
+                <line
+                  x1={MARGIN.left}
+                  y1={MARGIN.top + PLOT_H}
+                  x2={MARGIN.left + PLOT_W}
+                  y2={MARGIN.top + PLOT_H}
+                  stroke={axisStroke}
+                  strokeWidth="1.5"
+                />
 
                 {/* Axis labels */}
                 {activeFigure.layout?.xLabel && (
-                  <text x={MARGIN.left + PLOT_W / 2} y={SVG_H - 6} textAnchor="middle"
-                    fontSize="11" fontWeight="500" fill={titleFill}>
+                  <text
+                    x={MARGIN.left + PLOT_W / 2}
+                    y={SVG_H - 6}
+                    textAnchor="middle"
+                    fontSize="11"
+                    fontWeight="500"
+                    fill={titleFill}
+                  >
                     {activeFigure.layout.xLabel}
                   </text>
                 )}
                 {activeFigure.layout?.yLabel && (
-                  <text x={14} y={MARGIN.top + PLOT_H / 2} textAnchor="middle"
+                  <text
+                    x={14}
+                    y={MARGIN.top + PLOT_H / 2}
+                    textAnchor="middle"
                     transform={`rotate(-90 14 ${MARGIN.top + PLOT_H / 2})`}
-                    fontSize="11" fontWeight="500" fill={titleFill}>
+                    fontSize="11"
+                    fontWeight="500"
+                    fill={titleFill}
+                  >
                     {activeFigure.layout.yLabel}
                   </text>
                 )}

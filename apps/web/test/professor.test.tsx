@@ -25,13 +25,7 @@ describe("Milestone 2: Professor Dashboard & Grading Suite", () => {
     const handleSave = jest.fn();
     const handleClose = jest.fn();
 
-    render(
-      <AssignmentEditorModal
-        isOpen={true}
-        onClose={handleClose}
-        onSave={handleSave}
-      />
-    );
+    render(<AssignmentEditorModal isOpen={true} onClose={handleClose} onSave={handleSave} />);
 
     expect(screen.getByText(/Create New Lab Assignment/i)).toBeInTheDocument();
     expect(screen.getByText(/ECE Course Module/i)).toBeInTheDocument();
@@ -48,7 +42,7 @@ describe("Milestone 2: Professor Dashboard & Grading Suite", () => {
         title: expect.any(String),
         maxMarks: expect.any(Number),
         status: expect.any(String),
-      })
+      }),
     );
   });
 
@@ -70,12 +64,7 @@ describe("Milestone 2: Professor Dashboard & Grading Suite", () => {
 
     const handleBack = jest.fn();
 
-    render(
-      <SubmissionReview
-        assignment={mockAssignment}
-        onBack={handleBack}
-      />
-    );
+    render(<SubmissionReview assignment={mockAssignment} onBack={handleBack} />);
 
     expect(screen.getByText(/Back to Dashboard/i)).toBeInTheDocument();
     expect(screen.getByText(/Student Submissions/i)).toBeInTheDocument();

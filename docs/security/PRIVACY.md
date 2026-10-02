@@ -9,12 +9,12 @@
 
 V-Lab ECE collects and processes only the minimum data required to facilitate virtual laboratory learning, assignment submissions, and academic assessment:
 
-| Data Category | Specific Elements | Processing Purpose | Retention Period |
-| :--- | :--- | :--- | :--- |
-| **Account Credentials** | Full Name, Email, Roll Number, Hashed Password, Role | User authentication, section enrollment | Active academic enrollment + 1 year |
-| **Academic Submissions** | Python code snapshots, parameter states, figures, timestamps | Faculty assessment, grade assignment, similarity checks | Course duration + 3 academic years |
-| **Workspace State** | Draft Python code, unsaved workspace parameters | In-browser IndexedDB persistence for offline recovery | Local to client device; cleared upon user request |
-| **Audit Logs** | Timestamp, Actor User ID, Action Type, Target Resource | Platform security, fraud prevention, auditability | 180 days rolling window |
+| Data Category            | Specific Elements                                            | Processing Purpose                                      | Retention Period                                  |
+| :----------------------- | :----------------------------------------------------------- | :------------------------------------------------------ | :------------------------------------------------ |
+| **Account Credentials**  | Full Name, Email, Roll Number, Hashed Password, Role         | User authentication, section enrollment                 | Active academic enrollment + 1 year               |
+| **Academic Submissions** | Python code snapshots, parameter states, figures, timestamps | Faculty assessment, grade assignment, similarity checks | Course duration + 3 academic years                |
+| **Workspace State**      | Draft Python code, unsaved workspace parameters              | In-browser IndexedDB persistence for offline recovery   | Local to client device; cleared upon user request |
+| **Audit Logs**           | Timestamp, Actor User ID, Action Type, Target Resource       | Platform security, fraud prevention, auditability       | 180 days rolling window                           |
 
 ---
 

@@ -434,7 +434,11 @@ professorRouter.get(
       const submissions = await Submission.find({ assignmentId: asg._id }).populate("studentId");
 
       const submissionData = submissions.map((s) => {
-        const u = s.studentId as unknown as { fullName?: string; rollNumber?: string; email?: string } | null;
+        const u = s.studentId as unknown as {
+          fullName?: string;
+          rollNumber?: string;
+          email?: string;
+        } | null;
         const files = s.snapshot?.files || [];
         const mainFile = files.find((f) => f.path === "main.py") || files[0];
         return {

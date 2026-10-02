@@ -7,16 +7,17 @@
 
 ## 1. System Health & Probes
 
-| Probe Endpoint | Target Protocol | Expected Response | Description |
-| :--- | :--- | :--- | :--- |
-| `GET /api/health` | HTTP/1.1 | `{"status": "ok", "timestamp": "...", "database": "connected"}` | Kubernetes / Load Balancer liveness and readiness probe. |
-| `GET /api/v1/admin/vitals` | HTTP/1.1 (Admin Auth) | `{"students": 420, "faculty": 18, "workspaces": 1250, ...}` | Institutional operational metrics and storage utilization. |
+| Probe Endpoint             | Target Protocol       | Expected Response                                               | Description                                                |
+| :------------------------- | :-------------------- | :-------------------------------------------------------------- | :--------------------------------------------------------- |
+| `GET /api/health`          | HTTP/1.1              | `{"status": "ok", "timestamp": "...", "database": "connected"}` | Kubernetes / Load Balancer liveness and readiness probe.   |
+| `GET /api/v1/admin/vitals` | HTTP/1.1 (Admin Auth) | `{"students": 420, "faculty": 18, "workspaces": 1250, ...}`     | Institutional operational metrics and storage utilization. |
 
 ---
 
 ## 2. Client-Side Simulation Telemetry
 
 The Pyodide Web Worker reports execution metrics on every simulation run:
+
 - **Execution Wall Time:** Captured via `performance.now()` in WebAssembly runtime.
 - **Memory Allocation:** Tracked via WebAssembly heap memory sizing.
 - **Engine Downgrade / Error Metrics:** Failures loading binary packages or unhandled Python runtime exceptions are forwarded to the console diagnostics pane.

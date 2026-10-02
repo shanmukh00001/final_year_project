@@ -27,7 +27,8 @@ const INITIAL_ASSIGNMENTS: AssignmentFormData[] = [
     experimentId: "DSP-01",
     experimentVersion: 1,
     title: "Lab 1: Discrete Fourier Transform & Spectral Leakage",
-    instructions: "Implement 64-point and 128-point FFTs. Compare rectangular vs Hamming window spectral resolution.",
+    instructions:
+      "Implement 64-point and 128-point FFTs. Compare rectangular vs Hamming window spectral resolution.",
     sectionIds: ["ECE-A", "ECE-B"],
     dueAt: new Date(Date.now() + 4 * 24 * 3600 * 1000).toISOString(),
     allowLate: true,
@@ -41,7 +42,8 @@ const INITIAL_ASSIGNMENTS: AssignmentFormData[] = [
     experimentId: "NT-06",
     experimentVersion: 1,
     title: "Lab 2: Two-Port Network Z and Y Parameters",
-    instructions: "Compute impedance matrix inversion and verify reciprocity and symmetry conditions.",
+    instructions:
+      "Compute impedance matrix inversion and verify reciprocity and symmetry conditions.",
     sectionIds: ["ECE-A"],
     dueAt: new Date(Date.now() - 2 * 24 * 3600 * 1000).toISOString(),
     allowLate: false,
@@ -92,8 +94,7 @@ export const ProfessorDashboard: React.FC<ProfessorDashboardProps> = ({
   };
 
   const filteredAssignments = assignments.filter((a) => {
-    const matchesCourse =
-      selectedCourseFilter === "ALL" || a.courseCode === selectedCourseFilter;
+    const matchesCourse = selectedCourseFilter === "ALL" || a.courseCode === selectedCourseFilter;
     const matchesSearch =
       a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       a.experimentId.toLowerCase().includes(searchQuery.toLowerCase());

@@ -95,7 +95,12 @@ print("Y matrix:", Y_mat)
     const submissions = [
       { id: "sub-1", studentName: "Student 1", studentRoll: "21ECE001", code: codeBase },
       { id: "sub-2", studentName: "Student 2", studentRoll: "21ECE002", code: codeObfuscated },
-      { id: "sub-3", studentName: "Student 3", studentRoll: "21ECE003", code: codeCompletelyDifferent },
+      {
+        id: "sub-3",
+        studentName: "Student 3",
+        studentRoll: "21ECE003",
+        code: codeCompletelyDifferent,
+      },
     ];
 
     const pairs = analyzeBatchSimilarity(submissions, 0.8);

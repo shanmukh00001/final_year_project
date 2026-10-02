@@ -6,7 +6,9 @@ const PORT = env.PORT;
 
 async function start(): Promise<void> {
   // eslint-disable-next-line no-console
-  console.log(`[db] Connecting to MongoDB at ${env.MONGODB_URI.replace(/\/\/.*@/, "//<redacted>@")}...`);
+  console.log(
+    `[db] Connecting to MongoDB at ${env.MONGODB_URI.replace(/\/\/.*@/, "//<redacted>@")}...`,
+  );
   await connectDb();
   // eslint-disable-next-line no-console
   console.log("[db] MongoDB connected.");
