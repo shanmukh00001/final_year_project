@@ -6,8 +6,10 @@ export const DSP_EXPERIMENTS: ExperimentDefinition[] = [
     title: "DFT, FFT, and Spectral Leakage",
     course: "DSP",
     level: "UG",
-    objective: "Analyze DFT frequency resolution, window functions (Rectangular, Hamming, Hanning), and zero padding.",
-    theory: "The N-point Discrete Fourier Transform converts time series $x[n]$ to discrete spectrum $X[k] = \\sum_{n=0}^{N-1} x[n] e^{-j 2\\pi k n / N}$.",
+    objective:
+      "Analyze DFT frequency resolution, window functions (Rectangular, Hamming, Hanning), and zero padding.",
+    theory:
+      "The N-point Discrete Fourier Transform converts time series $x[n]$ to discrete spectrum $X[k] = \\sum_{n=0}^{N-1} x[n] e^{-j 2\\pi k n / N}$.",
     starterCode: `# DSP-01: DFT, FFT & Spectral Leakage
 import numpy as np
 import vlab
@@ -38,8 +40,10 @@ print(f"Computed 512-point zero-padded FFT with Rectangular and Hamming windows"
     title: "Linear and Circular Convolution",
     course: "DSP",
     level: "UG",
-    objective: "Implement linear convolution via circular convolution with appropriate zero-padding and overlap-add methods.",
-    theory: "Linear convolution of length $L$ and $M$ equals circular convolution when padded to length $N \\ge L + M - 1$.",
+    objective:
+      "Implement linear convolution via circular convolution with appropriate zero-padding and overlap-add methods.",
+    theory:
+      "Linear convolution of length $L$ and $M$ equals circular convolution when padded to length $N \\ge L + M - 1$.",
     starterCode: `# DSP-02: Linear vs Circular Convolution
 import numpy as np
 import vlab
@@ -72,8 +76,10 @@ print(f"Max absolute difference between linear & FFT convolution: {diff:.2e}")
     title: "FIR Filter Design",
     course: "DSP",
     level: "UG",
-    objective: "Design linear-phase FIR filters using window method and Parks-McClellan (Remez) algorithm.",
-    theory: "FIR filters offer exact linear phase and guaranteed stability due to having only zeros.",
+    objective:
+      "Design linear-phase FIR filters using window method and Parks-McClellan (Remez) algorithm.",
+    theory:
+      "FIR filters offer exact linear phase and guaranteed stability due to having only zeros.",
     starterCode: `# DSP-03: FIR Filter Design
 import numpy as np
 from scipy import signal
@@ -89,8 +95,24 @@ vlab.plot(w / np.pi, 20 * np.log10(np.abs(H) + 1e-12), label="Magnitude Response
 print(f"Designed FIR filter with {numtaps} taps and cutoff {fc}")
 `,
     parameters: [
-      { name: "fc", kind: "slider", default: 0.3, min: 0.05, max: 0.95, step: 0.05, label: "Cutoff Frequency (normalized)" },
-      { name: "numtaps", kind: "number", default: 51, min: 11, max: 101, step: 2, label: "Filter Taps" },
+      {
+        name: "fc",
+        kind: "slider",
+        default: 0.3,
+        min: 0.05,
+        max: 0.95,
+        step: 0.05,
+        label: "Cutoff Frequency (normalized)",
+      },
+      {
+        name: "numtaps",
+        kind: "number",
+        default: 51,
+        min: 11,
+        max: 101,
+        step: 2,
+        label: "Filter Taps",
+      },
     ],
     expectedOutputs: [{ kind: "plot", name: "FIR Filter Frequency Response" }],
     requiredPackages: ["numpy", "scipy"],
@@ -103,8 +125,10 @@ print(f"Designed FIR filter with {numtaps} taps and cutoff {fc}")
     title: "IIR Filter Design",
     course: "DSP",
     level: "UG",
-    objective: "Design digital IIR filters using Bilinear Transformation (Butterworth, Chebyshev, and Elliptic).",
-    theory: "IIR filters achieve sharp cutoff transitions with significantly fewer coefficients than FIR filters.",
+    objective:
+      "Design digital IIR filters using Bilinear Transformation (Butterworth, Chebyshev, and Elliptic).",
+    theory:
+      "IIR filters achieve sharp cutoff transitions with significantly fewer coefficients than FIR filters.",
     starterCode: `# DSP-04: IIR Butterworth Filter Design
 import numpy as np
 from scipy import signal
@@ -119,7 +143,9 @@ w, h = signal.freqz(b, a, worN=512)
 vlab.plot(w / np.pi, 20 * np.log10(np.abs(h) + 1e-12), label=f"Order {order} Butterworth", title="IIR Low-Pass Response")
 print(f"Butterworth Order {order} coefficients:\nb = {b}\na = {a}")
 `,
-    parameters: [{ name: "order", kind: "slider", default: 4, min: 1, max: 8, step: 1, label: "Filter Order" }],
+    parameters: [
+      { name: "order", kind: "slider", default: 4, min: 1, max: 8, step: 1, label: "Filter Order" },
+    ],
     expectedOutputs: [{ kind: "plot", name: "IIR Low-Pass Response" }],
     requiredPackages: ["numpy", "scipy"],
     estimatedRuntimeMs: 350,
@@ -131,8 +157,10 @@ print(f"Butterworth Order {order} coefficients:\nb = {b}\na = {a}")
     title: "Short-Time Fourier Transform (STFT)",
     course: "DSP",
     level: "UG",
-    objective: "Compute and visualize time-frequency spectrograms of non-stationary signals and chirp waveforms.",
-    theory: "STFT segments signal with sliding window: $X(m, \\omega) = \\sum_n x[n] w[n-m] e^{-j\\omega n}$.",
+    objective:
+      "Compute and visualize time-frequency spectrograms of non-stationary signals and chirp waveforms.",
+    theory:
+      "STFT segments signal with sliding window: $X(m, \\omega) = \\sum_n x[n] w[n-m] e^{-j\\omega n}$.",
     starterCode: `# DSP-05: STFT and Spectrogram
 import numpy as np
 from scipy import signal
@@ -160,8 +188,10 @@ print(f"STFT computed: {Zxx.shape[0]} frequency bins, {Zxx.shape[1]} time segmen
     title: "Multirate Signal Processing",
     course: "DSP",
     level: "UG",
-    objective: "Implement decimation (downsampling with anti-aliasing) and interpolation (upsampling with anti-imaging).",
-    theory: "Decimation reduces sampling rate by factor $M$ requiring anti-aliasing lowpass filter with cutoff $\\pi / M$.",
+    objective:
+      "Implement decimation (downsampling with anti-aliasing) and interpolation (upsampling with anti-imaging).",
+    theory:
+      "Decimation reduces sampling rate by factor $M$ requiring anti-aliasing lowpass filter with cutoff $\\pi / M$.",
     starterCode: `# DSP-06: Decimation and Interpolation
 import numpy as np
 from scipy import signal
@@ -189,8 +219,10 @@ print(f"Original length: {len(x)}, Decimated length: {len(y_dec)}")
     title: "Audio Filtering and Equalization",
     course: "DSP",
     level: "UG",
-    objective: "Filter audio signals using bandpass and notch filters to remove noise and unwanted tones.",
-    theory: "Notch filters eliminate a specific interfering harmonic frequency without altering surrounding spectrum.",
+    objective:
+      "Filter audio signals using bandpass and notch filters to remove noise and unwanted tones.",
+    theory:
+      "Notch filters eliminate a specific interfering harmonic frequency without altering surrounding spectrum.",
     starterCode: `# DSP-07: Audio Tone Filtering
 import numpy as np
 from scipy import signal

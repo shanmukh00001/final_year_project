@@ -11,6 +11,8 @@ import {
 import { WorkerManager } from "../engine/WorkerManager.js";
 import { saveLocalDraft, getLocalDraft } from "../lib/idb/drafts.js";
 
+import { getExperimentById } from "../data/curriculum/index.js";
+
 export type EngineStatus =
   | "uninitialized"
   | "booting"
@@ -41,9 +43,17 @@ export interface WorkspaceState {
   activeError: PyError | null;
   lastRunElapsedMs: number | null;
   unsavedChanges: boolean;
+  /** Populated from ENGINE_READY — reflects the actual running Python / package versions. */
+  engineRuntimeInfo: {
+    pythonVersion: string;
+    pyodideVersion: string;
+    numpy: string;
+    scipy: string;
+  } | null;
 
   // Actions
   initWorkspace: (experimentId: string, initialCode?: string) => void;
+  loadExperiment: (id: string) => void;
   setCode: (code: string) => void;
   setLiveRun: (enabled: boolean) => void;
   setParamValue: (name: string, value: ParamValue) => void;
@@ -87,6 +97,7 @@ vlab.plot(t, sig, label="Filtered Signal", title="FIR Filter Simulation")
   activeError: null,
   lastRunElapsedMs: null,
   unsavedChanges: false,
+  engineRuntimeInfo: null,
 
   initWorkspace: (experimentId: string, initialCode?: string) => {
     set({
@@ -131,14 +142,22 @@ vlab.plot(t, sig, label="Filtered Signal", title="FIR Filter Simulation")
             break;
 
           case "ENGINE_READY": {
+            const numpyVer = msg.packages ? msg.packages["numpy"] : undefined;
+            const scipyVer = msg.packages ? msg.packages["scipy"] : undefined;
             const sysLine: ConsoleLine = {
               id: `${Date.now()}-ready`,
               stream: "system",
-              text: `>>> Engine Ready (Python ${msg.pythonVersion}, Pyodide ${msg.pyodideVersion})`,
+              text: `>>> Engine Ready (Python ${msg.pythonVersion} · NumPy ${numpyVer ?? "?"} · SciPy ${scipyVer ?? "?"})`,
               timestamp: Date.now(),
             };
             set({
               engineStatus: "ready",
+              engineRuntimeInfo: {
+                pythonVersion: msg.pythonVersion,
+                pyodideVersion: msg.pyodideVersion,
+                numpy: numpyVer ?? "unknown",
+                scipy: scipyVer ?? "unknown",
+              },
               consoleLines: [...state.consoleLines, sysLine].slice(-MAX_CONSOLE_LINES),
             });
             break;
@@ -265,6 +284,66 @@ vlab.plot(t, sig, label="Filtered Signal", title="FIR Filter Simulation")
     workerManagerInstance.init();
   },
 
+  loadExperiment: (id: string) => {
+    // Cancel any pending debounced timers from the previous experiment
+    // to avoid stale autosaves or live-run executions contaminating the new one.
+    if (autosaveTimeout) {
+      clearTimeout(autosaveTimeout);
+      autosaveTimeout = null;
+    }
+    if (liveRunDebounceTimeout) {
+      clearTimeout(liveRunDebounceTimeout);
+      liveRunDebounceTimeout = null;
+    }
+
+    // Abort an in-progress run so the new experiment starts clean.
+    const { engineStatus } = get();
+    if ((engineStatus === "running" || engineStatus === "cancelling") && workerManagerInstance) {
+      workerManagerInstance.stop();
+    }
+
+    const exp = getExperimentById(id);
+    const starter = exp ? exp.starterCode : `# Experiment ${id}`;
+    const initialParams: Record<string, ParamValue> = {};
+    if (exp && exp.parameters) {
+      for (const p of exp.parameters) {
+        initialParams[p.name] = p.default;
+      }
+    }
+
+    set({
+      experimentId: id,
+      code: starter,
+      figures: [],
+      variables: [],
+      activeFigureId: null,
+      params: initialParams,
+      declaredParams: {},
+      activeError: null,
+      unsavedChanges: false,
+      consoleLines: [
+        ...get().consoleLines,
+        {
+          id: `${Date.now()}-load`,
+          stream: "system" as const,
+          text: `>>> Loaded experiment ${id}: ${exp?.title || id}`,
+          timestamp: Date.now(),
+        },
+      ].slice(-MAX_CONSOLE_LINES),
+    });
+
+    // Check IndexedDB draft for this experiment — only apply if it matches
+    void getLocalDraft(id).then((draft) => {
+      // Guard: ensure the experiment hasn't changed again since this async call started
+      if (draft && draft.experimentId === id && get().experimentId === id) {
+        set({
+          code: draft.code,
+          params: draft.params,
+        });
+      }
+    });
+  },
+
   setCode: (code: string) => {
     set({ code, unsavedChanges: true });
 
@@ -380,3 +459,9 @@ vlab.plot(t, sig, label="Filtered Signal", title="FIR Filter Simulation")
     );
   },
 }));
+
+if (typeof window !== "undefined") {
+  (
+    window as unknown as { __vlab_workspace_store: typeof useWorkspaceStore }
+  ).__vlab_workspace_store = useWorkspaceStore;
+}

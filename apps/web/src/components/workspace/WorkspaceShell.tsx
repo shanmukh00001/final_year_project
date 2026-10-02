@@ -36,10 +36,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({ theme, onToggleT
             <PanelGroup direction="vertical" autoSaveId="vlab.layout.v1.vc">
               {/* Center Top: Editor Pane */}
               <Panel id="editor" order={1} defaultSize={70} minSize={20}>
-                <MonacoCodeEditor
-                  theme={theme}
-                  onCursorChange={(pos) => setCursorPosition(pos)}
-                />
+                <MonacoCodeEditor theme={theme} onCursorChange={(pos) => setCursorPosition(pos)} />
               </Panel>
 
               <PanelResizeHandle className="h-1 bg-line hover:bg-brand/50 transition-colors cursor-row-resize z-10" />

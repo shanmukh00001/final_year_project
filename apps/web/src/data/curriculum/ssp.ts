@@ -6,8 +6,10 @@ export const SSP_EXPERIMENTS: ExperimentDefinition[] = [
     title: "Random Processes and Autocorrelation",
     course: "SSP",
     level: "PG",
-    objective: "Generate wide-sense stationary (WSS) random processes and compute sample autocorrelation function (ACF).",
-    theory: "For ergodic processes, time average $\\hat{R}_{xx}[k] = \\frac{1}{N} \\sum_{n=0}^{N-1-|k|} x[n] x[n+k]$ converges to ensemble $E[x[n]x[n+k]]$.",
+    objective:
+      "Generate wide-sense stationary (WSS) random processes and compute sample autocorrelation function (ACF).",
+    theory:
+      "For ergodic processes, time average $\\hat{R}_{xx}[k] = \\frac{1}{N} \\sum_{n=0}^{N-1-|k|} x[n] x[n+k]$ converges to ensemble $E[x[n]x[n+k]]$.",
     starterCode: `# SSP-01: Autocorrelation of Random Process
 import numpy as np
 import vlab
@@ -40,8 +42,10 @@ print(f"Variance estimate R(0): {acf[center]:.2f}")
     title: "Non-Parametric Spectral Estimation (Welch Method)",
     course: "SSP",
     level: "PG",
-    objective: "Compare raw periodogram, Bartlett averaged periodogram, and Welch overlapping segment averaging.",
-    theory: "Welch method reduces periodogram variance by averaging $50\\%$ overlapping Hann-windowed segments.",
+    objective:
+      "Compare raw periodogram, Bartlett averaged periodogram, and Welch overlapping segment averaging.",
+    theory:
+      "Welch method reduces periodogram variance by averaging $50\\%$ overlapping Hann-windowed segments.",
     starterCode: `# SSP-02: Welch Spectral Estimation
 import numpy as np
 from scipy import signal
@@ -69,8 +73,10 @@ print(f"Identified peaks around 100 Hz and 250 Hz")
     title: "Parametric Spectral Estimation (AR via Yule-Walker)",
     course: "SSP",
     level: "PG",
-    objective: "Estimate Autoregressive (AR) model parameters using Yule-Walker normal equations and Levinson-Durbin recursion.",
-    theory: "The Yule-Walker equations relate model parameters $a_k$ to the autocorrelation sequence $R_{xx}$.",
+    objective:
+      "Estimate Autoregressive (AR) model parameters using Yule-Walker normal equations and Levinson-Durbin recursion.",
+    theory:
+      "The Yule-Walker equations relate model parameters $a_k$ to the autocorrelation sequence $R_{xx}$.",
     starterCode: `# SSP-03: AR Yule-Walker Spectral Estimation
 import numpy as np
 from scipy import linalg
@@ -100,7 +106,8 @@ print(f"Estimated AR(2) parameters: a1 = {a_params[0]:.3f}, a2 = {a_params[1]:.3
     title: "Wiener Filtering and Optimal Estimation",
     course: "SSP",
     level: "PG",
-    objective: "Design optimal causal and non-causal FIR Wiener filters to minimize Mean Squared Error (MSE).",
+    objective:
+      "Design optimal causal and non-causal FIR Wiener filters to minimize Mean Squared Error (MSE).",
     theory: "Wiener-Hopf equations $R_{xx} w_{opt} = r_{dx}$ minimize $E[(d[n] - \\hat{d}[n])^2]$.",
     starterCode: `# SSP-04: FIR Wiener Filter
 import numpy as np
@@ -136,8 +143,10 @@ print(f"Estimated optimal Wiener coefficients: {np.round(w_opt, 3)}")
     title: "Adaptive Filters (LMS and RLS)",
     course: "SSP",
     level: "PG",
-    objective: "Implement Least Mean Squares (LMS) and Recursive Least Squares (RLS) adaptive filters for system identification.",
-    theory: "LMS weight update equation: $w[n+1] = w[n] + \\mu e[n] x[n]$, converging to Wiener solution.",
+    objective:
+      "Implement Least Mean Squares (LMS) and Recursive Least Squares (RLS) adaptive filters for system identification.",
+    theory:
+      "LMS weight update equation: $w[n+1] = w[n] + \\mu e[n] x[n]$, converging to Wiener solution.",
     starterCode: `# SSP-05: LMS Adaptive Filter
 import numpy as np
 import vlab
@@ -178,8 +187,10 @@ print(f"True weights: {h_true}\nLearned weights: {np.round(w, 3)}")
     title: "Kalman Filter for Object Tracking",
     course: "SSP",
     level: "PG",
-    objective: "Implement linear Kalman filter for 1D constant-velocity target position and velocity tracking.",
-    theory: "Kalman filter alternates between Predict ($x_{k|k-1} = F x_{k-1}$) and Update ($K_k = P_{k|k-1} H^T (H P_{k|k-1} H^T + R)^{-1}$).",
+    objective:
+      "Implement linear Kalman filter for 1D constant-velocity target position and velocity tracking.",
+    theory:
+      "Kalman filter alternates between Predict ($x_{k|k-1} = F x_{k-1}$) and Update ($K_k = P_{k|k-1} H^T (H P_{k|k-1} H^T + R)^{-1}$).",
     starterCode: `# SSP-06: 1D Constant Velocity Kalman Filter
 import numpy as np
 import vlab
@@ -233,8 +244,10 @@ print(f"Tracking RMS position error: {np.sqrt(np.mean((x_true[0, :] - x_est[0, :
     title: "Estimation Theory (MLE and CRLB)",
     course: "SSP",
     level: "PG",
-    objective: "Evaluate Maximum Likelihood Estimator (MLE) and compare empirical variance against the Cramer-Rao Lower Bound (CRLB).",
-    theory: "For DC level estimation in AWGN, CRLB is $\\operatorname{var}(\\hat{A}) \\ge \\frac{\\sigma^2}{N}$.",
+    objective:
+      "Evaluate Maximum Likelihood Estimator (MLE) and compare empirical variance against the Cramer-Rao Lower Bound (CRLB).",
+    theory:
+      "For DC level estimation in AWGN, CRLB is $\\operatorname{var}(\\hat{A}) \\ge \\frac{\\sigma^2}{N}$.",
     starterCode: `# SSP-07: MLE vs CRLB
 import numpy as np
 import vlab
@@ -266,8 +279,10 @@ print(f"At N=100: Empirical Var = {variances[3]:.4f}, CRLB = {crlb[3]:.4f}")
     title: "Detection Theory and Receiver Operating Characteristic (ROC)",
     course: "SSP",
     level: "PG",
-    objective: "Simulate binary hypothesis testing (Neyman-Pearson criterion) and plot Receiver Operating Characteristic (ROC) curves.",
-    theory: "Under Gaussian noise, detection probability $P_D = Q(Q^{-1}(P_{FA}) - d)$, where $d = \\sqrt{E/N_0}$ is the deflection coefficient.",
+    objective:
+      "Simulate binary hypothesis testing (Neyman-Pearson criterion) and plot Receiver Operating Characteristic (ROC) curves.",
+    theory:
+      "Under Gaussian noise, detection probability $P_D = Q(Q^{-1}(P_{FA}) - d)$, where $d = \\sqrt{E/N_0}$ is the deflection coefficient.",
     starterCode: `# SSP-08: Neyman-Pearson ROC Curves
 import numpy as np
 from scipy import stats

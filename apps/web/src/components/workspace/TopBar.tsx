@@ -2,6 +2,7 @@ import React from "react";
 import { Play, Square, RotateCcw, Trash2, Download, Moon, Sun, Zap } from "lucide-react";
 import { useWorkspaceStore } from "../../store/workspaceStore.js";
 import { EngineStatusPill } from "./EngineStatusPill.js";
+import { VALIDATED_EXPERIMENTS } from "../../data/curriculum/index.js";
 
 interface TopBarProps {
   theme: "light" | "dark";
@@ -16,11 +17,13 @@ export const TopBar: React.FC<TopBarProps> = ({ theme, onToggleTheme }) => {
     lastRunElapsedMs,
     liveRun,
     unsavedChanges,
+    engineRuntimeInfo,
     runCode,
     stopExecution,
     restartKernel,
     clearConsole,
     setLiveRun,
+    loadExperiment,
     exportCode,
     exportWorkspaceJson,
   } = useWorkspaceStore();
@@ -64,9 +67,18 @@ export const TopBar: React.FC<TopBarProps> = ({ theme, onToggleTheme }) => {
         <span className="text-fg-subtle">/</span>
 
         <div className="flex items-center gap-2">
-          <span className="rounded bg-brand-50 dark:bg-brand-900/30 px-2 py-0.5 font-mono font-medium text-brand text-xs">
-            {experimentId}
-          </span>
+          <select
+            data-testid="select-experiment"
+            value={experimentId}
+            onChange={(e) => loadExperiment(e.target.value)}
+            className="rounded bg-surface-2 border border-line px-2 py-1 font-mono font-medium text-fg text-xs focus:outline-none focus:ring-1 focus:ring-brand cursor-pointer"
+          >
+            {VALIDATED_EXPERIMENTS.map((exp) => (
+              <option key={exp.id} value={exp.id}>
+                [{exp.course}] {exp.id}: {exp.title}
+              </option>
+            ))}
+          </select>
           {unsavedChanges && (
             <span
               className="h-2 w-2 rounded-full bg-amber-500"
@@ -150,6 +162,7 @@ export const TopBar: React.FC<TopBarProps> = ({ theme, onToggleTheme }) => {
           status={engineStatus}
           bootProgress={bootProgress}
           lastRunElapsedMs={lastRunElapsedMs}
+          runtimeInfo={engineRuntimeInfo}
         />
 
         <div className="h-4 w-px bg-line" />

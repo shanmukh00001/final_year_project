@@ -85,7 +85,13 @@ describe("Phase 4: Frontend Workspace UI & State", () => {
   test("AC-WS-006: Variable inspector displays variables and hides private ones", () => {
     useWorkspaceStore.setState({
       variables: [
-        { name: "h", type: "ndarray", shape: "(51,)", dtype: "float64", preview: "[0.01, 0.05...]" },
+        {
+          name: "h",
+          type: "ndarray",
+          shape: "(51,)",
+          dtype: "float64",
+          preview: "[0.01, 0.05...]",
+        },
         { name: "fc", type: "float", shape: "", dtype: "float64", preview: "0.3" },
       ],
     });

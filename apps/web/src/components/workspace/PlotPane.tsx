@@ -106,12 +106,16 @@ export const PlotPane: React.FC<PlotPaneProps> = ({ theme }) => {
             <Activity className="h-10 w-10 stroke-1 mb-2 opacity-40 text-brand" />
             <p className="font-medium text-sm text-fg-muted">No Figures Generated</p>
             <p className="text-xs max-w-xs mt-1">
-              Call <code className="font-mono text-brand">vlab.plot(x, y)</code> in your Python script to visualize waveforms.
+              Call <code className="font-mono text-brand">vlab.plot(x, y)</code> in your Python
+              script to visualize waveforms.
             </p>
           </div>
         ) : showDataTable ? (
           /* AC-PLT-007: Accessible Data Table View */
-          <div data-testid="plot-data-table" className="w-full h-full overflow-auto text-xs font-mono">
+          <div
+            data-testid="plot-data-table"
+            className="w-full h-full overflow-auto text-xs font-mono"
+          >
             <table className="w-full border-collapse border border-line text-left">
               <thead>
                 <tr className="bg-surface-2 border-b border-line text-fg-muted font-semibold">
@@ -128,14 +132,18 @@ export const PlotPane: React.FC<PlotPaneProps> = ({ theme }) => {
                     return (
                       <tr key={idx} className="border-b border-line hover:bg-hover">
                         <td className="p-2 border-r border-line text-fg-subtle">{idx}</td>
-                        <td className="p-2 border-r border-line">{typeof x === "number" ? x.toFixed(4) : String(x)}</td>
+                        <td className="p-2 border-r border-line">
+                          {typeof x === "number" ? x.toFixed(4) : String(x)}
+                        </td>
                         <td className="p-2">{typeof y === "number" ? y.toFixed(4) : String(y)}</td>
                       </tr>
                     );
                   })
                 ) : (
                   <tr>
-                    <td colSpan={3} className="p-3 text-center text-fg-subtle">No trace coordinates available</td>
+                    <td colSpan={3} className="p-3 text-center text-fg-subtle">
+                      No trace coordinates available
+                    </td>
                   </tr>
                 )}
               </tbody>
@@ -143,7 +151,10 @@ export const PlotPane: React.FC<PlotPaneProps> = ({ theme }) => {
           </div>
         ) : (
           /* Visualizer Canvas */
-          <div data-testid="plot-canvas" className="w-full h-full flex flex-col rounded border border-line bg-surface p-4 shadow-sm">
+          <div
+            data-testid="plot-canvas"
+            className="w-full h-full flex flex-col rounded border border-line bg-surface p-4 shadow-sm"
+          >
             <div className="flex items-center justify-between border-b border-line pb-2 mb-3">
               <h3 className="font-semibold text-sm text-fg">
                 {activeFigure.layout?.title || "Simulation Figure"}
@@ -156,19 +167,43 @@ export const PlotPane: React.FC<PlotPaneProps> = ({ theme }) => {
             {/* SVG Render Canvas */}
             <div className="flex-1 w-full flex items-center justify-center">
               <svg className="w-full h-full min-h-[180px]" viewBox="0 0 500 250">
-                <line x1="40" y1="20" x2="40" y2="220" stroke={theme === "dark" ? "#334155" : "#cbd5e1"} strokeWidth="1" />
-                <line x1="40" y1="220" x2="480" y2="220" stroke={theme === "dark" ? "#334155" : "#cbd5e1"} strokeWidth="1" />
-                <line x1="40" y1="120" x2="480" y2="120" stroke={theme === "dark" ? "#1e293b" : "#f1f5f9"} strokeDasharray="3 3" />
-                
+                <line
+                  x1="40"
+                  y1="20"
+                  x2="40"
+                  y2="220"
+                  stroke={theme === "dark" ? "#334155" : "#cbd5e1"}
+                  strokeWidth="1"
+                />
+                <line
+                  x1="40"
+                  y1="220"
+                  x2="480"
+                  y2="220"
+                  stroke={theme === "dark" ? "#334155" : "#cbd5e1"}
+                  strokeWidth="1"
+                />
+                <line
+                  x1="40"
+                  y1="120"
+                  x2="480"
+                  y2="120"
+                  stroke={theme === "dark" ? "#1e293b" : "#f1f5f9"}
+                  strokeDasharray="3 3"
+                />
+
                 {primaryTrace?.x && primaryTrace?.y && (
                   <path
-                    d={`M 40 120 ${Array.from({ length: Math.min(500, primaryTrace.x.length) }, (_, i) => {
-                      const yVal = primaryTrace.y ? primaryTrace.y[i] ?? 0 : 0;
-                      const len = primaryTrace.x ? primaryTrace.x.length : 1;
-                      const px = 40 + (i / Math.max(1, Math.min(500, len) - 1)) * 430;
-                      const py = 120 - yVal * 70;
-                      return `L ${px.toFixed(1)} ${Math.max(25, Math.min(215, py)).toFixed(1)}`;
-                    }).join(" ")}`}
+                    d={`M 40 120 ${Array.from(
+                      { length: Math.min(500, primaryTrace.x.length) },
+                      (_, i) => {
+                        const yVal = primaryTrace.y ? (primaryTrace.y[i] ?? 0) : 0;
+                        const len = primaryTrace.x ? primaryTrace.x.length : 1;
+                        const px = 40 + (i / Math.max(1, Math.min(500, len) - 1)) * 430;
+                        const py = 120 - yVal * 70;
+                        return `L ${px.toFixed(1)} ${Math.max(25, Math.min(215, py)).toFixed(1)}`;
+                      },
+                    ).join(" ")}`}
                     fill="none"
                     stroke="#0072b2"
                     strokeWidth="2"

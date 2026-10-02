@@ -68,8 +68,12 @@ export function computeDerivedStatus(
   now: Date = new Date(),
 ): "not_started" | "in_progress" | "submitted" | "late_submitted" | "graded" | "missed" {
   if (submission) {
-    if (submission.grade) {return "graded";}
-    if (submission.isLate) {return "late_submitted";}
+    if (submission.grade) {
+      return "graded";
+    }
+    if (submission.isLate) {
+      return "late_submitted";
+    }
     return "submitted";
   }
 
@@ -128,7 +132,9 @@ assignmentsRouter.get(
 
       const draftSet = new Set<string>();
       for (const ws of workspaces) {
-        if (ws.assignmentId) {draftSet.add(ws.assignmentId.toString());}
+        if (ws.assignmentId) {
+          draftSet.add(ws.assignmentId.toString());
+        }
       }
 
       const results = assignments.map((asg) => {

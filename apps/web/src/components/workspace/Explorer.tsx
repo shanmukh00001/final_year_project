@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Folder, Sliders, BookOpen, ChevronRight, ChevronDown, RefreshCw } from "lucide-react";
 import { useWorkspaceStore } from "../../store/workspaceStore.js";
+import { getExperimentById } from "../../data/curriculum/index.js";
 import { type ParamValue } from "@vlab/shared";
 
 export const Explorer: React.FC = () => {
@@ -10,6 +11,7 @@ export const Explorer: React.FC = () => {
   const [paramsOpen, setParamsOpen] = useState(true);
   const [instructionsOpen, setInstructionsOpen] = useState(false);
 
+  const activeExp = getExperimentById(experimentId);
   const paramKeys = Object.keys(declaredParams);
 
   return (
@@ -24,7 +26,11 @@ export const Explorer: React.FC = () => {
           onClick={() => setFilesOpen(!filesOpen)}
           className="flex w-full items-center gap-1.5 px-3 py-2 font-semibold text-fg-muted uppercase tracking-wider hover:bg-hover"
         >
-          {filesOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+          {filesOpen ? (
+            <ChevronDown className="h-3.5 w-3.5" />
+          ) : (
+            <ChevronRight className="h-3.5 w-3.5" />
+          )}
           <Folder className="h-3.5 w-3.5 text-brand" />
           <span>Files</span>
         </button>
@@ -50,7 +56,11 @@ export const Explorer: React.FC = () => {
             onClick={() => setParamsOpen(!paramsOpen)}
             className="flex items-center gap-1.5 font-semibold text-fg-muted uppercase tracking-wider hover:text-fg"
           >
-            {paramsOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+            {paramsOpen ? (
+              <ChevronDown className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronRight className="h-3.5 w-3.5" />
+            )}
             <Sliders className="h-3.5 w-3.5 text-accent-500" />
             <span>Parameters ({paramKeys.length})</span>
           </button>
@@ -71,7 +81,10 @@ export const Explorer: React.FC = () => {
                 const currentVal = params[name] !== undefined ? params[name] : decl.default;
 
                 return (
-                  <div key={name} className="space-y-1 rounded bg-surface p-2 border border-line shadow-sm">
+                  <div
+                    key={name}
+                    className="space-y-1 rounded bg-surface p-2 border border-line shadow-sm"
+                  >
                     <div className="flex items-center justify-between font-mono text-[11px]">
                       <span className="font-medium text-fg" title={decl.label || name}>
                         {decl.label || name} ({name})
@@ -156,20 +169,45 @@ export const Explorer: React.FC = () => {
           onClick={() => setInstructionsOpen(!instructionsOpen)}
           className="flex w-full items-center gap-1.5 px-3 py-2 font-semibold text-fg-muted uppercase tracking-wider hover:bg-hover"
         >
-          {instructionsOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+          {instructionsOpen ? (
+            <ChevronDown className="h-3.5 w-3.5" />
+          ) : (
+            <ChevronRight className="h-3.5 w-3.5" />
+          )}
           <BookOpen className="h-3.5 w-3.5 text-amber-500" />
           <span>Instructions & Theory</span>
         </button>
 
         {instructionsOpen && (
-          <div className="p-3 text-fg-muted text-[11px] leading-relaxed">
-            <h4 className="font-semibold text-fg mb-1">Experiment: {experimentId}</h4>
-            <p>
-              Design an FIR filter satisfying specific passband and stopband attenuation requirements.
-              Adjust the cutoff frequency <code className="font-mono text-brand">fc</code> and tap count{" "}
-              <code className="font-mono text-brand">numtaps</code> using the sliders above to observe
-              frequency responses in real time.
-            </p>
+          <div className="p-3 text-fg-muted text-[11px] leading-relaxed space-y-2">
+            <div>
+              <h4 className="font-semibold text-fg text-xs">
+                {activeExp ? `${activeExp.id}: ${activeExp.title}` : experimentId}
+              </h4>
+              {activeExp && (
+                <span className="inline-block rounded bg-brand-50 dark:bg-brand-900/30 px-1.5 py-0.5 text-[10px] font-mono text-brand mt-0.5">
+                  [{activeExp.course}] {activeExp.level} Level
+                </span>
+              )}
+            </div>
+
+            {activeExp?.objective && (
+              <div>
+                <span className="font-semibold text-fg block text-[10px] uppercase tracking-wider">
+                  Objective
+                </span>
+                <p className="text-fg-muted mt-0.5">{activeExp.objective}</p>
+              </div>
+            )}
+
+            {activeExp?.theory && (
+              <div>
+                <span className="font-semibold text-fg block text-[10px] uppercase tracking-wider">
+                  Theory & Principles
+                </span>
+                <p className="text-fg-muted mt-0.5 whitespace-pre-wrap">{activeExp.theory}</p>
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -7,7 +7,10 @@ class MockWorker {
   public onerror: ((e: ErrorEvent) => void) | null = null;
   private terminated = false;
 
-  constructor(public scriptUrl: string | URL, public options?: WorkerOptions) {}
+  constructor(
+    public scriptUrl: string | URL,
+    public options?: WorkerOptions,
+  ) {}
 
   postMessage(data: unknown): void {
     if (this.terminated) {
@@ -39,7 +42,10 @@ class MockWorker {
         }
 
         // Check for policy violation simulation
-        if (payload.code && (payload.code.includes("import js") || payload.code.includes("import pyodide"))) {
+        if (
+          payload.code &&
+          (payload.code.includes("import js") || payload.code.includes("import pyodide"))
+        ) {
           this.emit({
             type: "RUN_FAILED",
             runId,

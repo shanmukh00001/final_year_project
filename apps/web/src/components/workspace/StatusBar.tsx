@@ -5,7 +5,9 @@ interface StatusBarProps {
   cursorPosition?: { lineNumber: number; column: number };
 }
 
-export const StatusBar: React.FC<StatusBarProps> = ({ cursorPosition = { lineNumber: 1, column: 1 } }) => {
+export const StatusBar: React.FC<StatusBarProps> = ({
+  cursorPosition = { lineNumber: 1, column: 1 },
+}) => {
   const { engineStatus, unsavedChanges, lastRunElapsedMs } = useWorkspaceStore();
 
   return (
@@ -21,10 +23,10 @@ export const StatusBar: React.FC<StatusBarProps> = ({ cursorPosition = { lineNum
               engineStatus === "ready"
                 ? "bg-emerald-500"
                 : engineStatus === "running"
-                ? "bg-blue-500 animate-pulse"
-                : engineStatus === "booting"
-                ? "bg-amber-500 animate-pulse"
-                : "bg-neutral-400"
+                  ? "bg-blue-500 animate-pulse"
+                  : engineStatus === "booting"
+                    ? "bg-amber-500 animate-pulse"
+                    : "bg-neutral-400"
             }`}
           />
           <span>Python 3.14 (Pyodide)</span>
@@ -47,7 +49,9 @@ export const StatusBar: React.FC<StatusBarProps> = ({ cursorPosition = { lineNum
           Ln {cursorPosition.lineNumber}, Col {cursorPosition.column}
         </span>
         <span>·</span>
-        <span className={unsavedChanges ? "text-amber-500" : "text-emerald-600 dark:text-emerald-400"}>
+        <span
+          className={unsavedChanges ? "text-amber-500" : "text-emerald-600 dark:text-emerald-400"}
+        >
           {unsavedChanges ? "Draft unsaved" : "Draft saved (IndexedDB)"}
         </span>
       </div>

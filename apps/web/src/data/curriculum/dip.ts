@@ -6,8 +6,10 @@ export const DIP_EXPERIMENTS: ExperimentDefinition[] = [
     title: "Image Point Operations and Gamma Correction",
     course: "DIP",
     level: "UG",
-    objective: "Implement negative transformation, logarithmic scaling, and power-law (gamma) intensity modifications.",
-    theory: "Power-law transformation is given by $s = c \\cdot r^\\gamma$, used for monitor brightness calibration.",
+    objective:
+      "Implement negative transformation, logarithmic scaling, and power-law (gamma) intensity modifications.",
+    theory:
+      "Power-law transformation is given by $s = c \\cdot r^\\gamma$, used for monitor brightness calibration.",
     starterCode: `# DIP-01: Image Point Operations
 import numpy as np
 import vlab
@@ -24,7 +26,17 @@ img_gamma = img ** float(gamma)
 vlab.plot(x, img_gamma[50, :], label=f"Gamma = {gamma}", title="Intensity Transformation Profile")
 print(f"Computed gamma correction with gamma = {gamma}")
 `,
-    parameters: [{ name: "gamma", kind: "slider", default: 1.5, min: 0.2, max: 3.0, step: 0.1, label: "Gamma Value" }],
+    parameters: [
+      {
+        name: "gamma",
+        kind: "slider",
+        default: 1.5,
+        min: 0.2,
+        max: 3.0,
+        step: 0.1,
+        label: "Gamma Value",
+      },
+    ],
     expectedOutputs: [{ kind: "plot", name: "Intensity Transformation Profile" }],
     requiredPackages: ["numpy", "scipy"],
     estimatedRuntimeMs: 300,
@@ -36,8 +48,10 @@ print(f"Computed gamma correction with gamma = {gamma}")
     title: "Histogram Equalization and Contrast Enhancement",
     course: "DIP",
     level: "UG",
-    objective: "Compute image histograms and apply cumulative distribution function (CDF) equalization to improve contrast.",
-    theory: "Histogram equalization flattens the probability density function (PDF) using $s_k = T(r_k) = \\sum_{j=0}^k p_r(r_j)$.",
+    objective:
+      "Compute image histograms and apply cumulative distribution function (CDF) equalization to improve contrast.",
+    theory:
+      "Histogram equalization flattens the probability density function (PDF) using $s_k = T(r_k) = \\sum_{j=0}^k p_r(r_j)$.",
     starterCode: `# DIP-02: Histogram Equalization
 import numpy as np
 import vlab
@@ -65,8 +79,10 @@ print(f"Histogram Equalization complete. Original dynamic range: [{img.min()}, {
     title: "Spatial Filtering and Noise Reduction",
     course: "DIP",
     level: "UG",
-    objective: "Apply averaging, Gaussian smoothing, median, and Laplacian sharpening spatial convolution filters.",
-    theory: "Linear spatial filtering computes output pixel as $g(x,y) = \\sum_{s} \\sum_{t} w(s,t) f(x+s, y+t)$.",
+    objective:
+      "Apply averaging, Gaussian smoothing, median, and Laplacian sharpening spatial convolution filters.",
+    theory:
+      "Linear spatial filtering computes output pixel as $g(x,y) = \\sum_{s} \\sum_{t} w(s,t) f(x+s, y+t)$.",
     starterCode: `# DIP-03: Spatial Filtering
 import numpy as np
 from scipy import signal
@@ -93,8 +109,10 @@ print(f"Gaussian 5x5 Kernel:\n{np.round(kernel, 4)}")
     title: "2D Discrete Fourier Transform & Frequency Filtering",
     course: "DIP",
     level: "UG",
-    objective: "Perform 2D FFT on image arrays and analyze ideal and Butterworth low-pass and high-pass filters.",
-    theory: "2D DFT $F(u,v) = \\sum_x \\sum_y f(x,y) e^{-j 2\\pi (ux/M + vy/N)}$ reveals directional spatial frequencies.",
+    objective:
+      "Perform 2D FFT on image arrays and analyze ideal and Butterworth low-pass and high-pass filters.",
+    theory:
+      "2D DFT $F(u,v) = \\sum_x \\sum_y f(x,y) e^{-j 2\\pi (ux/M + vy/N)}$ reveals directional spatial frequencies.",
     starterCode: `# DIP-04: 2D DFT & Frequency Filtering
 import numpy as np
 import vlab
@@ -121,8 +139,10 @@ print(f"2D DFT calculated on {N}x{N} matrix")
     title: "Edge Detection Operators",
     course: "DIP",
     level: "UG",
-    objective: "Implement Sobel, Prewitt, and Laplacian edge detectors and analyze gradient magnitude and direction.",
-    theory: "The Sobel gradient magnitude $M(x,y) = \\sqrt{G_x^2 + G_y^2}$ detects abrupt intensity discontinuities.",
+    objective:
+      "Implement Sobel, Prewitt, and Laplacian edge detectors and analyze gradient magnitude and direction.",
+    theory:
+      "The Sobel gradient magnitude $M(x,y) = \\sqrt{G_x^2 + G_y^2}$ detects abrupt intensity discontinuities.",
     starterCode: `# DIP-05: Sobel Edge Detection
 import numpy as np
 from scipy import signal
@@ -153,8 +173,10 @@ print(f"Detected edge magnitude max: {mag.max():.1f}")
     title: "Morphological Image Processing",
     course: "DIP",
     level: "UG",
-    objective: "Execute fundamental morphological operations: erosion, dilation, opening, and closing with structuring elements.",
-    theory: "Erosion $A \\ominus B = \\{z \\mid (B)_z \\subseteq A\\}$ shrinks foreground objects; Dilation expands them.",
+    objective:
+      "Execute fundamental morphological operations: erosion, dilation, opening, and closing with structuring elements.",
+    theory:
+      "Erosion $A \\ominus B = \\{z \\mid (B)_z \\subseteq A\\}$ shrinks foreground objects; Dilation expands them.",
     starterCode: `# DIP-06: Morphological Processing
 import numpy as np
 from scipy import ndimage
@@ -182,8 +204,10 @@ print(f"Original pixels: {binary_img.sum()}, Eroded: {eroded.sum()}, Dilated: {d
     title: "Image Segmentation and Thresholding",
     course: "DIP",
     level: "UG",
-    objective: "Segment grayscale images into object and background regions using Otsu global optimal thresholding.",
-    theory: "Otsu's method maximizes between-class variance $\\sigma_B^2 = \\omega_0 \\omega_1 (\\mu_0 - \\mu_1)^2$.",
+    objective:
+      "Segment grayscale images into object and background regions using Otsu global optimal thresholding.",
+    theory:
+      "Otsu's method maximizes between-class variance $\\sigma_B^2 = \\omega_0 \\omega_1 (\\mu_0 - \\mu_1)^2$.",
     starterCode: `# DIP-07: Otsu Thresholding
 import numpy as np
 import vlab

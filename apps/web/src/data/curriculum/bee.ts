@@ -6,8 +6,10 @@ export const BEE_EXPERIMENTS: ExperimentDefinition[] = [
     title: "PN-Junction Diode I-V Characteristics",
     course: "BEE",
     level: "UG",
-    objective: "Simulate forward and reverse bias I-V characteristics of a PN junction diode using the Shockley equation.",
-    theory: "Shockley equation: $I = I_s (e^{V_D / (\\eta V_T)} - 1)$, where $V_T \\approx 26\\text{ mV}$ at room temperature.",
+    objective:
+      "Simulate forward and reverse bias I-V characteristics of a PN junction diode using the Shockley equation.",
+    theory:
+      "Shockley equation: $I = I_s (e^{V_D / (\\eta V_T)} - 1)$, where $V_T \\approx 26\\text{ mV}$ at room temperature.",
     starterCode: `# BEE-01: PN Diode Characteristics
 import numpy as np
 import vlab
@@ -34,8 +36,10 @@ print(f"Current at Vd=0.7V: {Is * (np.exp(0.7 / (eta * Vt)) - 1) * 1e3:.2f} mA")
     title: "Rectifiers and Filter Ripple Factor",
     course: "BEE",
     level: "UG",
-    objective: "Analyze half-wave and full-wave bridge rectifier waveforms and calculate ripple factor with filter capacitors.",
-    theory: "Ripple factor $\\gamma = \\frac{V_{ac,rms}}{V_{dc}} = \\frac{1}{2\\sqrt{3} f R_L C}$ for full-wave rectifiers.",
+    objective:
+      "Analyze half-wave and full-wave bridge rectifier waveforms and calculate ripple factor with filter capacitors.",
+    theory:
+      "Ripple factor $\\gamma = \\frac{V_{ac,rms}}{V_{dc}} = \\frac{1}{2\\sqrt{3} f R_L C}$ for full-wave rectifiers.",
     starterCode: `# BEE-02: Full-Wave Rectifier
 import numpy as np
 import vlab
@@ -60,7 +64,8 @@ print(f"DC voltage of full-wave rectified signal: {2 * 12.0 / np.pi:.2f} V")
     course: "BEE",
     level: "UG",
     objective: "Evaluate line and load regulation of a Zener diode voltage regulator circuit.",
-    theory: "In breakdown, the Zener diode maintains an almost constant voltage $V_Z$ across varying supply voltages and load currents.",
+    theory:
+      "In breakdown, the Zener diode maintains an almost constant voltage $V_Z$ across varying supply voltages and load currents.",
     starterCode: `# BEE-03: Zener Voltage Regulator
 import numpy as np
 import vlab
@@ -86,8 +91,10 @@ print(f"Regulated voltage clamped at {Vz} V")
     title: "BJT Characteristics and Q-Point",
     course: "BEE",
     level: "UG",
-    objective: "Plot common-emitter output characteristics ($I_C$ vs $V_{CE}$) and locate the DC operating Q-point.",
-    theory: "$I_C = \\beta I_B$ in the active region; DC load line equation is $V_{CE} = V_{CC} - I_C R_C$.",
+    objective:
+      "Plot common-emitter output characteristics ($I_C$ vs $V_{CE}$) and locate the DC operating Q-point.",
+    theory:
+      "$I_C = \\beta I_B$ in the active region; DC load line equation is $V_{CE} = V_{CC} - I_C R_C$.",
     starterCode: `# BEE-04: BJT Common-Emitter Characteristics
 import numpy as np
 import vlab
@@ -119,7 +126,8 @@ print(f"Computed BJT curves for beta={beta}")
     course: "BEE",
     level: "UG",
     objective: "Simulate inverting, non-inverting, integrator, and differentiator op-amp circuits.",
-    theory: "Ideal inverting amplifier closed-loop gain $A_v = -\\frac{R_f}{R_1}$; non-inverting gain $A_v = 1 + \\frac{R_f}{R_1}$.",
+    theory:
+      "Ideal inverting amplifier closed-loop gain $A_v = -\\frac{R_f}{R_1}$; non-inverting gain $A_v = 1 + \\frac{R_f}{R_1}$.",
     starterCode: `# BEE-05: Inverting Op-Amp
 import numpy as np
 import vlab
@@ -135,7 +143,17 @@ v_out = Gain * v_in
 vlab.plot(t, v_out, label=f"Gain={Gain:.1f}", title="Inverting Op-Amp Output")
 print(f"Closed-loop Voltage Gain: {Gain:.2f}")
 `,
-    parameters: [{ name: "Rf", kind: "slider", default: 10.0, min: 1.0, max: 50.0, step: 1.0, label: "Feedback Rf (kOhms)" }],
+    parameters: [
+      {
+        name: "Rf",
+        kind: "slider",
+        default: 10.0,
+        min: 1.0,
+        max: 50.0,
+        step: 1.0,
+        label: "Feedback Rf (kOhms)",
+      },
+    ],
     expectedOutputs: [{ kind: "plot", name: "Inverting Op-Amp Output" }],
     requiredPackages: ["numpy", "scipy"],
     estimatedRuntimeMs: 300,
@@ -177,7 +195,8 @@ print(f"Inputs:\nA: {A.astype(int)}\nB: {B.astype(int)}\nXOR: {XOR_out.astype(in
     course: "BEE",
     level: "UG",
     objective: "Demonstrate filtering and phase shift of RC networks over audio frequency ranges.",
-    theory: "Cutoff frequency is given by $f_c = \\frac{1}{2\\pi R C}$ where output drops to $\\frac{1}{\\sqrt{2}} \\approx 0.707$ of input.",
+    theory:
+      "Cutoff frequency is given by $f_c = \\frac{1}{2\\pi R C}$ where output drops to $\\frac{1}{\\sqrt{2}} \\approx 0.707$ of input.",
     starterCode: `# BEE-07: RC Filter Frequency Response
 import numpy as np
 import vlab

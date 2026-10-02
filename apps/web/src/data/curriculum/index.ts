@@ -21,9 +21,7 @@ export const ALL_EXPERIMENTS: ExperimentDefinition[] = [
 export const VALIDATED_EXPERIMENTS: ExperimentDefinition[] = ALL_EXPERIMENTS.map((exp) => {
   const parsed = ExperimentSchema.safeParse(exp);
   if (!parsed.success) {
-    throw new Error(
-      `Invalid experiment definition for ${exp.id}: ${parsed.error.message}`,
-    );
+    throw new Error(`Invalid experiment definition for ${exp.id}: ${parsed.error.message}`);
   }
   return parsed.data;
 });

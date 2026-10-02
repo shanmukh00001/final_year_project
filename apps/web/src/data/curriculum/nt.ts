@@ -6,8 +6,10 @@ export const NT_EXPERIMENTS: ExperimentDefinition[] = [
     title: "Thevenin and Norton Equivalents",
     course: "NT",
     level: "UG",
-    objective: "Determine Thevenin voltage, Norton current, and equivalent resistance of linear DC circuits.",
-    theory: "Thevenin's theorem reduces any linear two-terminal circuit to an independent voltage source $V_{th}$ in series with $R_{th}$.",
+    objective:
+      "Determine Thevenin voltage, Norton current, and equivalent resistance of linear DC circuits.",
+    theory:
+      "Thevenin's theorem reduces any linear two-terminal circuit to an independent voltage source $V_{th}$ in series with $R_{th}$.",
     starterCode: `# NT-01: Thevenin and Norton Equivalents
 import numpy as np
 import vlab
@@ -34,8 +36,10 @@ print(f"V_th: {v_th} V, R_th: {r_th} Ohms, I_norton: {v_th/r_th} A")
     title: "Maximum Power Transfer Theorem",
     course: "NT",
     level: "UG",
-    objective: "Verify that maximum power is delivered to the load when load resistance equals source Thevenin resistance.",
-    theory: "Power transferred $P_L = I_L^2 R_L = \\frac{V_{th}^2 R_L}{(R_{th} + R_L)^2}$, maximizing at $R_L = R_{th}$.",
+    objective:
+      "Verify that maximum power is delivered to the load when load resistance equals source Thevenin resistance.",
+    theory:
+      "Power transferred $P_L = I_L^2 R_L = \\frac{V_{th}^2 R_L}{(R_{th} + R_L)^2}$, maximizing at $R_L = R_{th}$.",
     starterCode: `# NT-02: Maximum Power Transfer
 import numpy as np
 import vlab
@@ -49,7 +53,17 @@ p_load = (v_th ** 2 * r_load) / ((r_th + r_load) ** 2)
 vlab.plot(r_load, p_load, label="Power (W)", title="Maximum Power Transfer Curve")
 print(f"Max power occurs at R_load = {r_th} Ohms with P_max = {(v_th**2)/(4*r_th):.4f} W")
 `,
-    parameters: [{ name: "r_th", kind: "slider", default: 50.0, min: 10.0, max: 200.0, step: 10.0, label: "Thevenin R_th (Ohms)" }],
+    parameters: [
+      {
+        name: "r_th",
+        kind: "slider",
+        default: 50.0,
+        min: 10.0,
+        max: 200.0,
+        step: 10.0,
+        label: "Thevenin R_th (Ohms)",
+      },
+    ],
     expectedOutputs: [{ kind: "plot", name: "Maximum Power Transfer Curve" }],
     requiredPackages: ["numpy", "scipy"],
     estimatedRuntimeMs: 300,
@@ -61,8 +75,10 @@ print(f"Max power occurs at R_load = {r_th} Ohms with P_max = {(v_th**2)/(4*r_th
     title: "RLC Transient Response",
     course: "NT",
     level: "UG",
-    objective: "Analyze overdamped, critically damped, and underdamped transient responses of series RLC circuits.",
-    theory: "The characteristic equation $s^2 + \\frac{R}{L}s + \\frac{1}{LC} = 0$ governs transient damping.",
+    objective:
+      "Analyze overdamped, critically damped, and underdamped transient responses of series RLC circuits.",
+    theory:
+      "The characteristic equation $s^2 + \\frac{R}{L}s + \\frac{1}{LC} = 0$ governs transient damping.",
     starterCode: `# NT-03: RLC Transient Response
 import numpy as np
 from scipy import signal
@@ -82,7 +98,17 @@ t, y = signal.step(sys, T=t)
 vlab.plot(t, y, label=f"R={R} Ohms", title="Series RLC Step Response")
 print(f"Damping ratio zeta: {R / (2 * np.sqrt(L / C)):.3f}")
 `,
-    parameters: [{ name: "R", kind: "slider", default: 20.0, min: 1.0, max: 100.0, step: 5.0, label: "Resistance R (Ohms)" }],
+    parameters: [
+      {
+        name: "R",
+        kind: "slider",
+        default: 20.0,
+        min: 1.0,
+        max: 100.0,
+        step: 5.0,
+        label: "Resistance R (Ohms)",
+      },
+    ],
     expectedOutputs: [{ kind: "plot", name: "Series RLC Step Response" }],
     requiredPackages: ["numpy", "scipy"],
     estimatedRuntimeMs: 350,
@@ -94,8 +120,10 @@ print(f"Damping ratio zeta: {R / (2 * np.sqrt(L / C)):.3f}")
     title: "AC Steady State and Phasors",
     course: "NT",
     level: "UG",
-    objective: "Compute sinusoidal steady-state voltages and currents using complex impedance and phasor analysis.",
-    theory: "Inductive impedance $Z_L = j\\omega L$ and capacitive impedance $Z_C = \\frac{1}{j\\omega C}$.",
+    objective:
+      "Compute sinusoidal steady-state voltages and currents using complex impedance and phasor analysis.",
+    theory:
+      "Inductive impedance $Z_L = j\\omega L$ and capacitive impedance $Z_C = \\frac{1}{j\\omega C}$.",
     starterCode: `# NT-04: AC Steady State & Phasors
 import numpy as np
 import vlab
@@ -129,8 +157,10 @@ print(f"Impedance: {Z_total:.2f} Ohms, Current Mag: {np.abs(I_circuit):.2f} A, P
     title: "Series and Parallel Resonance",
     course: "NT",
     level: "UG",
-    objective: "Determine resonant frequency, quality factor Q, and half-power bandwidth of resonant circuits.",
-    theory: "Resonant frequency $\\omega_0 = \\frac{1}{\\sqrt{LC}}$, and Quality Factor $Q = \\frac{\\omega_0 L}{R}$.",
+    objective:
+      "Determine resonant frequency, quality factor Q, and half-power bandwidth of resonant circuits.",
+    theory:
+      "Resonant frequency $\\omega_0 = \\frac{1}{\\sqrt{LC}}$, and Quality Factor $Q = \\frac{\\omega_0 L}{R}$.",
     starterCode: `# NT-05: Series Resonance
 import numpy as np
 import vlab
@@ -149,7 +179,17 @@ I_mag = 10.0 / np.abs(Z)
 vlab.plot(freqs, I_mag, label=f"R={R} Ohms", title="Series RLC Resonance Frequency Response")
 print(f"Resonant frequency f0 = {f0:.1f} Hz, Q = {(2*np.pi*f0*L)/R:.2f}")
 `,
-    parameters: [{ name: "R", kind: "slider", default: 10.0, min: 2.0, max: 50.0, step: 2.0, label: "Resistance R" }],
+    parameters: [
+      {
+        name: "R",
+        kind: "slider",
+        default: 10.0,
+        min: 2.0,
+        max: 50.0,
+        step: 2.0,
+        label: "Resistance R",
+      },
+    ],
     expectedOutputs: [{ kind: "plot", name: "Series RLC Resonance Frequency Response" }],
     requiredPackages: ["numpy", "scipy"],
     estimatedRuntimeMs: 350,
@@ -161,8 +201,10 @@ print(f"Resonant frequency f0 = {f0:.1f} Hz, Q = {(2*np.pi*f0*L)/R:.2f}")
     title: "Two-Port Network Parameters",
     course: "NT",
     level: "UG",
-    objective: "Calculate and convert between Impedance (Z), Admittance (Y), Transmission (ABCD), and Hybrid (h) parameters.",
-    theory: "Two-port parameters relate port voltages and currents: $[V] = [Z][I]$ and $[I] = [Y][V]$.",
+    objective:
+      "Calculate and convert between Impedance (Z), Admittance (Y), Transmission (ABCD), and Hybrid (h) parameters.",
+    theory:
+      "Two-port parameters relate port voltages and currents: $[V] = [Z][I]$ and $[I] = [Y][V]$.",
     starterCode: `# NT-06: Two-Port Parameters
 import numpy as np
 import vlab
@@ -192,8 +234,10 @@ print(f"Z-matrix:\n{Z_matrix}\nY-matrix:\n{Y_matrix}")
     title: "Passive Filter Frequency Response",
     course: "NT",
     level: "UG",
-    objective: "Design passive low-pass, high-pass, and band-pass filters and plot Bode magnitude and phase curves.",
-    theory: "For a first-order RC low-pass filter, the cutoff frequency is $f_c = \\frac{1}{2\\pi RC}$.",
+    objective:
+      "Design passive low-pass, high-pass, and band-pass filters and plot Bode magnitude and phase curves.",
+    theory:
+      "For a first-order RC low-pass filter, the cutoff frequency is $f_c = \\frac{1}{2\\pi RC}$.",
     starterCode: `# NT-07: Passive RC Filter Bode Plot
 import numpy as np
 from scipy import signal

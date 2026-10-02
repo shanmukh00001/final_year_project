@@ -6,8 +6,10 @@ export const SS_EXPERIMENTS: ExperimentDefinition[] = [
     title: "Elementary Signal Generation",
     course: "SS",
     level: "UG",
-    objective: "Generate and analyze continuous and discrete elementary signals (step, ramp, impulse, exponentials, sinusoids).",
-    theory: "Elementary signals like unit step $u(t)$, ramp $r(t) = t \\cdot u(t)$, and sinusoidal signals $x(t) = A \\cos(2\\pi f t + \\phi)$ form the basis for continuous and discrete-time system analysis.",
+    objective:
+      "Generate and analyze continuous and discrete elementary signals (step, ramp, impulse, exponentials, sinusoids).",
+    theory:
+      "Elementary signals like unit step $u(t)$, ramp $r(t) = t \\cdot u(t)$, and sinusoidal signals $x(t) = A \\cos(2\\pi f t + \\phi)$ form the basis for continuous and discrete-time system analysis.",
     starterCode: `# SS-01: Elementary Signal Generation
 import numpy as np
 import vlab
@@ -23,8 +25,24 @@ vlab.plot(t, sine_wave, label="Sinusoid", title="Elementary Sinusoidal Signal")
 print(f"Generated {len(t)} samples at f = {f} Hz, amplitude = {amp}")
 `,
     parameters: [
-      { name: "f", kind: "slider", default: 5.0, min: 1.0, max: 50.0, step: 1.0, label: "Frequency (Hz)" },
-      { name: "amp", kind: "slider", default: 1.0, min: 0.1, max: 5.0, step: 0.1, label: "Amplitude" },
+      {
+        name: "f",
+        kind: "slider",
+        default: 5.0,
+        min: 1.0,
+        max: 50.0,
+        step: 1.0,
+        label: "Frequency (Hz)",
+      },
+      {
+        name: "amp",
+        kind: "slider",
+        default: 1.0,
+        min: 0.1,
+        max: 5.0,
+        step: 0.1,
+        label: "Amplitude",
+      },
     ],
     expectedOutputs: [{ kind: "plot", name: "Elementary Sinusoidal Signal" }],
     requiredPackages: ["numpy", "scipy"],
@@ -37,8 +55,10 @@ print(f"Generated {len(t)} samples at f = {f} Hz, amplitude = {amp}")
     title: "Linear Convolution",
     course: "SS",
     level: "UG",
-    objective: "Compute linear convolution of discrete signals and explore commutative and associative properties.",
-    theory: "Linear convolution of $x[n]$ and $h[n]$ is defined as $y[n] = \\sum_{k=-\\infty}^{\\infty} x[k] h[n-k]$.",
+    objective:
+      "Compute linear convolution of discrete signals and explore commutative and associative properties.",
+    theory:
+      "Linear convolution of $x[n]$ and $h[n]$ is defined as $y[n] = \\sum_{k=-\\infty}^{\\infty} x[k] h[n-k]$.",
     starterCode: `# SS-02: Linear Convolution
 import numpy as np
 import vlab
@@ -65,8 +85,10 @@ print(f"Convolution output length: {len(y)}")
     title: "Fourier Series and Gibbs Phenomenon",
     course: "SS",
     level: "UG",
-    objective: "Reconstruct periodic signals using Fourier series harmonic sums and observe the Gibbs phenomenon.",
-    theory: "A periodic square wave is represented by $x(t) = \\frac{4}{\\pi} \\sum_{k=1,3,5,\\dots}^{N} \\frac{1}{k} \\sin(k \\omega_0 t)$.",
+    objective:
+      "Reconstruct periodic signals using Fourier series harmonic sums and observe the Gibbs phenomenon.",
+    theory:
+      "A periodic square wave is represented by $x(t) = \\frac{4}{\\pi} \\sum_{k=1,3,5,\\dots}^{N} \\frac{1}{k} \\sin(k \\omega_0 t)$.",
     starterCode: `# SS-03: Fourier Series & Gibbs Phenomenon
 import numpy as np
 import vlab
@@ -84,7 +106,9 @@ for k in range(1, int(N) + 1, 2):
 vlab.plot(t, x_recon, label=f"N={N} harmonics", title="Fourier Series Square Wave Approximation")
 print(f"Synthesized Fourier series up to harmonic {N}")
 `,
-    parameters: [{ name: "N", kind: "number", default: 7, min: 1, max: 35, step: 2, label: "Harmonics Count" }],
+    parameters: [
+      { name: "N", kind: "number", default: 7, min: 1, max: 35, step: 2, label: "Harmonics Count" },
+    ],
     expectedOutputs: [{ kind: "plot", name: "Fourier Series Square Wave Approximation" }],
     requiredPackages: ["numpy", "scipy"],
     estimatedRuntimeMs: 350,
@@ -96,8 +120,10 @@ print(f"Synthesized Fourier series up to harmonic {N}")
     title: "Fourier Transform Properties",
     course: "SS",
     level: "UG",
-    objective: "Verify linearity, time-shifting, and frequency-scaling properties of the Continuous-Time Fourier Transform.",
-    theory: "For $x(t) \\leftrightarrow X(j\\omega)$, time shifting states $x(t - t_0) \\leftrightarrow X(j\\omega) e^{-j\\omega t_0}$.",
+    objective:
+      "Verify linearity, time-shifting, and frequency-scaling properties of the Continuous-Time Fourier Transform.",
+    theory:
+      "For $x(t) \\leftrightarrow X(j\\omega)$, time shifting states $x(t - t_0) \\leftrightarrow X(j\\omega) e^{-j\\omega t_0}$.",
     starterCode: `# SS-04: Fourier Transform Properties
 import numpy as np
 import vlab
@@ -124,7 +150,8 @@ print("Computed Fourier transform spectrum")
     title: "Sampling Theorem and Aliasing",
     course: "SS",
     level: "UG",
-    objective: "Demonstrate Nyquist-Shannon sampling theorem and the occurrence of aliasing when sampling below the Nyquist rate.",
+    objective:
+      "Demonstrate Nyquist-Shannon sampling theorem and the occurrence of aliasing when sampling below the Nyquist rate.",
     theory: "To avoid aliasing, the sampling frequency must satisfy $f_s > 2 f_{max}$.",
     starterCode: `# SS-05: Sampling Theorem & Aliasing
 import numpy as np
@@ -142,7 +169,17 @@ x_samp = np.sin(2 * np.pi * f_sig * t_samp)
 vlab.plot(t_samp, x_samp, label=f"Sampled at {fs} Hz", title="Signal Sampling & Aliasing Demonstration")
 print(f"Sampling frequency: {fs} Hz (Nyquist: {2*f_sig} Hz)")
 `,
-    parameters: [{ name: "fs", kind: "slider", default: 20.0, min: 5.0, max: 100.0, step: 5.0, label: "Sampling Rate fs (Hz)" }],
+    parameters: [
+      {
+        name: "fs",
+        kind: "slider",
+        default: 20.0,
+        min: 5.0,
+        max: 100.0,
+        step: 5.0,
+        label: "Sampling Rate fs (Hz)",
+      },
+    ],
     expectedOutputs: [{ kind: "plot", name: "Signal Sampling & Aliasing Demonstration" }],
     requiredPackages: ["numpy", "scipy"],
     estimatedRuntimeMs: 300,
@@ -154,8 +191,10 @@ print(f"Sampling frequency: {fs} Hz (Nyquist: {2*f_sig} Hz)")
     title: "Pole-Zero Plots and LTI Stability",
     course: "SS",
     level: "UG",
-    objective: "Analyze pole-zero constellation and determine BIBO stability and frequency response of linear time-invariant systems.",
-    theory: "A continuous LTI system is BIBO stable if all poles of its transfer function $H(s)$ have negative real parts.",
+    objective:
+      "Analyze pole-zero constellation and determine BIBO stability and frequency response of linear time-invariant systems.",
+    theory:
+      "A continuous LTI system is BIBO stable if all poles of its transfer function $H(s)$ have negative real parts.",
     starterCode: `# SS-06: Pole-Zero Plots and Stability
 import numpy as np
 from scipy import signal
@@ -178,8 +217,10 @@ print("Evaluated second-order continuous LTI frequency response")
     title: "Laplace and Z-Transform Analysis",
     course: "SS",
     level: "UG",
-    objective: "Perform partial fraction expansion and compute impulse response of continuous and discrete systems.",
-    theory: "Partial fraction expansion decomposes $H(s) = \\frac{B(s)}{A(s)} = \\sum \\frac{r_k}{s - p_k} + k(s)$.",
+    objective:
+      "Perform partial fraction expansion and compute impulse response of continuous and discrete systems.",
+    theory:
+      "Partial fraction expansion decomposes $H(s) = \\frac{B(s)}{A(s)} = \\sum \\frac{r_k}{s - p_k} + k(s)$.",
     starterCode: `# SS-07: Laplace and Z-Transform
 import numpy as np
 from scipy import signal

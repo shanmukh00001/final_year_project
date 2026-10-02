@@ -6,8 +6,10 @@ export const ACS_EXPERIMENTS: ExperimentDefinition[] = [
     title: "Digital Modulation Schemes",
     course: "ACS",
     level: "PG",
-    objective: "Simulate and plot constellation diagrams for BPSK, QPSK, 16-QAM, and 64-QAM digital modulation.",
-    theory: "M-ary QAM represents $\\log_2(M)$ bits per symbol by modulating in-phase ($I$) and quadrature ($Q$) carrier amplitudes.",
+    objective:
+      "Simulate and plot constellation diagrams for BPSK, QPSK, 16-QAM, and 64-QAM digital modulation.",
+    theory:
+      "M-ary QAM represents $\\log_2(M)$ bits per symbol by modulating in-phase ($I$) and quadrature ($Q$) carrier amplitudes.",
     starterCode: `# ACS-01: Digital Modulation
 import numpy as np
 import vlab
@@ -32,8 +34,10 @@ print(f"Generated 16-QAM constellation with {len(symbols)} points")
     title: "Monte Carlo BER in AWGN versus Theory",
     course: "ACS",
     level: "PG",
-    objective: "Perform Monte Carlo simulation of BPSK bit error rate (BER) in AWGN channel and compare against theoretical $Q(\\sqrt{2E_b/N_0})$.",
-    theory: "Theoretical BPSK BER: $P_b = \\frac{1}{2} \\operatorname{erfc}\\left(\\sqrt{\\frac{E_b}{N_0}}\\right)$.",
+    objective:
+      "Perform Monte Carlo simulation of BPSK bit error rate (BER) in AWGN channel and compare against theoretical $Q(\\sqrt{2E_b/N_0})$.",
+    theory:
+      "Theoretical BPSK BER: $P_b = \\frac{1}{2} \\operatorname{erfc}\\left(\\sqrt{\\frac{E_b}{N_0}}\\right)$.",
     starterCode: `# ACS-02: BPSK BER in AWGN vs Theory
 import numpy as np
 from scipy import special
@@ -58,8 +62,10 @@ print(f"At Eb/N0 = 6 dB: Theoretical BER = {theory_ber[3]:.4e}")
     title: "Pulse Shaping and Eye Diagram",
     course: "ACS",
     level: "PG",
-    objective: "Design Root-Raised Cosine (RRC) pulse shaping filters and evaluate inter-symbol interference (ISI).",
-    theory: "RRC filter with roll-off $\\alpha$ limits bandwidth while satisfying the Nyquist criterion for zero ISI.",
+    objective:
+      "Design Root-Raised Cosine (RRC) pulse shaping filters and evaluate inter-symbol interference (ISI).",
+    theory:
+      "RRC filter with roll-off $\\alpha$ limits bandwidth while satisfying the Nyquist criterion for zero ISI.",
     starterCode: `# ACS-03: Pulse Shaping & RRC Filter
 import numpy as np
 import vlab
@@ -74,7 +80,17 @@ h_rrc = np.sinc(t) * np.cos(np.pi * float(alpha) * t) / (1 - (2 * float(alpha) *
 vlab.plot(t, h_rrc, label=f"RRC alpha={alpha}", title="Root-Raised Cosine Pulse")
 print(f"RRC Filter generated with roll-off alpha = {alpha}")
 `,
-    parameters: [{ name: "alpha", kind: "slider", default: 0.35, min: 0.1, max: 0.9, step: 0.05, label: "Roll-off Factor" }],
+    parameters: [
+      {
+        name: "alpha",
+        kind: "slider",
+        default: 0.35,
+        min: 0.1,
+        max: 0.9,
+        step: 0.05,
+        label: "Roll-off Factor",
+      },
+    ],
     expectedOutputs: [{ kind: "plot", name: "Root-Raised Cosine Pulse" }],
     requiredPackages: ["numpy", "scipy"],
     estimatedRuntimeMs: 350,
@@ -86,8 +102,10 @@ print(f"RRC Filter generated with roll-off alpha = {alpha}")
     title: "Matched Filter and Optimal Receiver",
     course: "ACS",
     level: "PG",
-    objective: "Demonstrate that the matched filter maximizes SNR at the sampling instant in white Gaussian noise.",
-    theory: "The matched filter impulse response is $h(t) = s^*(T - t)$, producing peak output $\\int |s(t)|^2 dt$.",
+    objective:
+      "Demonstrate that the matched filter maximizes SNR at the sampling instant in white Gaussian noise.",
+    theory:
+      "The matched filter impulse response is $h(t) = s^*(T - t)$, producing peak output $\\int |s(t)|^2 dt$.",
     starterCode: `# ACS-04: Matched Filter
 import numpy as np
 from scipy import signal
@@ -116,8 +134,10 @@ print(f"Matched filter output peak: {output.max():.2f}")
     title: "Fading Channels and Diversity Combining",
     course: "ACS",
     level: "PG",
-    objective: "Simulate Rayleigh and Rician flat fading channels and evaluate Maximal Ratio Combining (MRC).",
-    theory: "MRC diversity with $L$ independent antennas achieves diversity order $L$, drastically reducing outage probability.",
+    objective:
+      "Simulate Rayleigh and Rician flat fading channels and evaluate Maximal Ratio Combining (MRC).",
+    theory:
+      "MRC diversity with $L$ independent antennas achieves diversity order $L$, drastically reducing outage probability.",
     starterCode: `# ACS-05: Rayleigh Fading & MRC Diversity
 import numpy as np
 import vlab
@@ -145,8 +165,10 @@ print(f"Mean SNR single: {gamma_1.mean():.2f}, Mean SNR 2-branch MRC: {gamma_mrc
     title: "OFDM Transceiver with Cyclic Prefix",
     course: "ACS",
     level: "PG",
-    objective: "Implement complete Orthogonal Frequency Division Multiplexing (OFDM) chain with IFFT/FFT and cyclic prefix.",
-    theory: "Cyclic Prefix converts linear channel convolution into circular convolution, enabling simple 1-tap frequency domain equalization.",
+    objective:
+      "Implement complete Orthogonal Frequency Division Multiplexing (OFDM) chain with IFFT/FFT and cyclic prefix.",
+    theory:
+      "Cyclic Prefix converts linear channel convolution into circular convolution, enabling simple 1-tap frequency domain equalization.",
     starterCode: `# ACS-06: OFDM Transceiver
 import numpy as np
 import vlab
@@ -176,7 +198,8 @@ print(f"Transmitted OFDM frame with {N_subcarriers} subcarriers + {cp_len} CP sa
     title: "MIMO Channel Capacity and Spatial Multiplexing",
     course: "ACS",
     level: "PG",
-    objective: "Calculate ergodic capacity of $N_t \\times N_r$ MIMO channels and simulate Zero-Forcing (ZF) receiver.",
+    objective:
+      "Calculate ergodic capacity of $N_t \\times N_r$ MIMO channels and simulate Zero-Forcing (ZF) receiver.",
     theory: "MIMO capacity: $C = \\log_2 \\det\\left(I + \\frac{\\rho}{N_t} H H^H\\right)$.",
     starterCode: `# ACS-07: 2x2 MIMO Capacity
 import numpy as np
@@ -206,8 +229,10 @@ print(f"Capacity at 20 dB SNR: {capacity[20]:.2f} bps/Hz")
     title: "Carrier and Timing Synchronisation",
     course: "ACS",
     level: "PG",
-    objective: "Implement Costas loop phase-locked loop (PLL) for carrier recovery and Gardner Timing Error Detector (TED).",
-    theory: "The Costas loop phase detector computes $e[n] = I[n] \\cdot Q[n]$ to track carrier frequency offset.",
+    objective:
+      "Implement Costas loop phase-locked loop (PLL) for carrier recovery and Gardner Timing Error Detector (TED).",
+    theory:
+      "The Costas loop phase detector computes $e[n] = I[n] \\cdot Q[n]$ to track carrier frequency offset.",
     starterCode: `# ACS-08: Costas Loop Carrier Recovery
 import numpy as np
 import vlab

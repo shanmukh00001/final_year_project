@@ -26,7 +26,9 @@ export const ExperimentOutputExpectationSchema = z.object({
 export type ExperimentOutputExpectation = z.infer<typeof ExperimentOutputExpectationSchema>;
 
 export const ExperimentSchema = z.object({
-  id: z.string().regex(/^[A-Z]{2,3}-\d{2}$/, "Invalid experiment ID format, expected e.g. SS-01 or DSP-03"),
+  id: z
+    .string()
+    .regex(/^[A-Z]{2,3}-\d{2}$/, "Invalid experiment ID format, expected e.g. SS-01 or DSP-03"),
   title: z.string().min(3),
   course: CourseCodeSchema,
   level: CourseLevelSchema,

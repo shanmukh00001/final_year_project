@@ -25,12 +25,12 @@ const engineConfigSchema = z.object({
 const paramDeclSchema = z.object({
   name: z.string(),
   default: z.union([z.number(), z.string(), z.boolean()]),
-  min: z.number().optional(),
-  max: z.number().optional(),
-  step: z.number().optional(),
-  label: z.string().optional(),
-  kind: z.enum(["slider", "number", "select", "toggle"]),
-  options: z.array(z.string()).optional(),
+  min: z.number().nullable().optional(),
+  max: z.number().nullable().optional(),
+  step: z.number().nullable().optional(),
+  label: z.string().nullable().optional(),
+  kind: z.enum(["slider", "number", "select", "toggle"]).optional(),
+  options: z.array(z.string()).nullable().optional(),
 });
 
 const variableInfoSchema = z.object({
@@ -57,19 +57,20 @@ const figureKindSchema = z.enum([
 ]);
 
 const figureLayoutSchema = z.object({
-  title: z.string().optional(),
-  xLabel: z.string().optional(),
-  yLabel: z.string().optional(),
-  xScale: z.enum(["linear", "log"]).optional(),
-  yScale: z.enum(["linear", "log"]).optional(),
-  xRange: z.tuple([z.number(), z.number()]).optional(),
-  yRange: z.tuple([z.number(), z.number()]).optional(),
-  grid: z.boolean().optional(),
-  legend: z.boolean().optional(),
+  title: z.string().nullable().optional(),
+  xLabel: z.string().nullable().optional(),
+  yLabel: z.string().nullable().optional(),
+  xScale: z.enum(["linear", "log"]).nullable().optional(),
+  yScale: z.enum(["linear", "log"]).nullable().optional(),
+  xRange: z.tuple([z.number(), z.number()]).nullable().optional(),
+  yRange: z.tuple([z.number(), z.number()]).nullable().optional(),
+  grid: z.boolean().nullable().optional(),
+  legend: z.boolean().nullable().optional(),
   subplots: z
     .object({ rows: z.number(), cols: z.number(), shareX: z.boolean().optional() })
+    .nullable()
     .optional(),
-  aspect: z.enum(["auto", "equal"]).optional(),
+  aspect: z.enum(["auto", "equal"]).nullable().optional(),
   shapes: z
     .array(
       z.object({
@@ -81,6 +82,7 @@ const figureLayoutSchema = z.object({
         r: z.number().optional(),
       }),
     )
+    .nullable()
     .optional(),
 });
 
@@ -95,19 +97,27 @@ const traceDataSchema = z.object({
     "scatter3d",
     "histogram",
   ]),
-  name: z.string().optional(),
-  x: z.instanceof(Float64Array).optional(),
-  y: z.instanceof(Float64Array).optional(),
-  z: z.instanceof(Float64Array).optional(),
+  name: z.string().nullable().optional(),
+  x: z.union([z.instanceof(Float64Array), z.array(z.number())]).optional(),
+  y: z.union([z.instanceof(Float64Array), z.array(z.number())]).optional(),
+  z: z.union([z.instanceof(Float64Array), z.array(z.number())]).optional(),
   zMatrix: z
-    .object({ data: z.instanceof(Float64Array), rows: z.number(), cols: z.number() })
+    .object({
+      data: z.union([z.instanceof(Float64Array), z.array(z.number())]),
+      rows: z.number(),
+      cols: z.number(),
+    })
     .optional(),
   imageRgba: z
-    .object({ data: z.instanceof(Uint8ClampedArray), width: z.number(), height: z.number() })
+    .object({
+      data: z.union([z.instanceof(Uint8ClampedArray), z.array(z.number())]),
+      width: z.number(),
+      height: z.number(),
+    })
     .optional(),
-  mode: z.enum(["lines", "markers", "lines+markers", "stem"]).optional(),
-  xAxis: z.enum(["x", "x2"]).optional(),
-  yAxis: z.enum(["y", "y2"]).optional(),
+  mode: z.enum(["lines", "markers", "lines+markers", "stem"]).nullable().optional(),
+  xAxis: z.enum(["x", "x2"]).nullable().optional(),
+  yAxis: z.enum(["y", "y2"]).nullable().optional(),
   style: z
     .object({
       color: z.string().optional(),
@@ -116,6 +126,7 @@ const traceDataSchema = z.object({
       markerSize: z.number().optional(),
       opacity: z.number().optional(),
     })
+    .nullable()
     .optional(),
 });
 
@@ -124,6 +135,7 @@ const figureSpecSchema = z.object({
   kind: figureKindSchema,
   layout: figureLayoutSchema,
   traces: z.array(traceDataSchema),
+  rasterSvg: z.string().optional(),
   raster: z
     .object({
       mime: z.enum(["image/png", "image/svg+xml"]),

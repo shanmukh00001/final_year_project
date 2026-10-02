@@ -386,8 +386,12 @@ professorRouter.get(
       const counts = new Array(10).fill(0);
       for (const m of marksList) {
         let binIdx = Math.floor(m / binStep);
-        if (binIdx >= 10) {binIdx = 9;}
-        if (binIdx < 0) {binIdx = 0;}
+        if (binIdx >= 10) {
+          binIdx = 9;
+        }
+        if (binIdx < 0) {
+          binIdx = 0;
+        }
         counts[binIdx] += 1;
       }
 

@@ -49,7 +49,9 @@ export const Catalog: React.FC<CatalogPageProps> = ({ onSelectExperiment }) => {
           </div>
           <div>
             <h1 className="font-bold text-base leading-none">ECE Virtual Laboratory</h1>
-            <p className="text-[11px] text-fg-muted mt-0.5">Interactive Pyodide Simulation Curriculum</p>
+            <p className="text-[11px] text-fg-muted mt-0.5">
+              Interactive Pyodide Simulation Curriculum
+            </p>
           </div>
         </div>
 
@@ -72,7 +74,9 @@ export const Catalog: React.FC<CatalogPageProps> = ({ onSelectExperiment }) => {
                 data-testid="filter-level-all"
                 onClick={() => setSelectedLevel("ALL")}
                 className={`rounded-md px-3 py-1 text-xs font-medium transition ${
-                  selectedLevel === "ALL" ? "bg-brand text-white shadow-sm" : "text-fg-muted hover:text-fg"
+                  selectedLevel === "ALL"
+                    ? "bg-brand text-white shadow-sm"
+                    : "text-fg-muted hover:text-fg"
                 }`}
               >
                 All Levels
@@ -82,7 +86,9 @@ export const Catalog: React.FC<CatalogPageProps> = ({ onSelectExperiment }) => {
                 data-testid="filter-level-ug"
                 onClick={() => setSelectedLevel("UG")}
                 className={`rounded-md px-3 py-1 text-xs font-medium transition ${
-                  selectedLevel === "UG" ? "bg-brand text-white shadow-sm" : "text-fg-muted hover:text-fg"
+                  selectedLevel === "UG"
+                    ? "bg-brand text-white shadow-sm"
+                    : "text-fg-muted hover:text-fg"
                 }`}
               >
                 Undergraduate (UG)
@@ -92,7 +98,9 @@ export const Catalog: React.FC<CatalogPageProps> = ({ onSelectExperiment }) => {
                 data-testid="filter-level-pg"
                 onClick={() => setSelectedLevel("PG")}
                 className={`rounded-md px-3 py-1 text-xs font-medium transition ${
-                  selectedLevel === "PG" ? "bg-brand text-white shadow-sm" : "text-fg-muted hover:text-fg"
+                  selectedLevel === "PG"
+                    ? "bg-brand text-white shadow-sm"
+                    : "text-fg-muted hover:text-fg"
                 }`}
               >
                 Postgraduate (PG)
@@ -130,7 +138,10 @@ export const Catalog: React.FC<CatalogPageProps> = ({ onSelectExperiment }) => {
         </div>
 
         {/* Experiment Cards Grid */}
-        <div data-testid="experiment-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div
+          data-testid="experiment-grid"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+        >
           {filteredExperiments.map((exp) => (
             <div
               key={exp.id}

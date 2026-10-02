@@ -63,8 +63,12 @@ export const VariablesPane: React.FC = () => {
                     {v.name}
                   </td>
                   <td className="px-2.5 py-1.5 text-fg-muted border-r border-line">{v.type}</td>
-                  <td className="px-2.5 py-1.5 text-fg-muted border-r border-line">{v.shape || "-"}</td>
-                  <td className="px-2.5 py-1.5 text-fg-muted border-r border-line">{v.dtype || "-"}</td>
+                  <td className="px-2.5 py-1.5 text-fg-muted border-r border-line">
+                    {v.shape || "-"}
+                  </td>
+                  <td className="px-2.5 py-1.5 text-fg-muted border-r border-line">
+                    {v.dtype || "-"}
+                  </td>
                   <td className="px-2.5 py-1.5">
                     <div className="flex items-center justify-between gap-2">
                       <span className="truncate max-w-[120px] text-fg-subtle" title={v.preview}>

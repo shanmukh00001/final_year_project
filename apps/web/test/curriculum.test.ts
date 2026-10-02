@@ -9,7 +9,7 @@ import { ExperimentSchema } from "@vlab/shared";
 describe("Phase 5: Experiment Curriculum Validation (AC-CAT)", () => {
   test("AC-CAT-001: Curriculum lists all 7 courses with exact experiment counts and UG/PG tags", () => {
     const courses = ["SS", "NT", "DSP", "DIP", "BEE", "ACS", "SSP"];
-    
+
     // Check all 7 courses exist
     for (const c of courses) {
       const exps = getExperimentsByCourse(c);

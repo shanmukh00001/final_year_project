@@ -75,7 +75,9 @@ function clearRefreshCookie(res: Response): void {
 
 function getRefreshTokenFromCookie(req: Request): string | null {
   const header = req.header("cookie");
-  if (!header) {return null;}
+  if (!header) {
+    return null;
+  }
   const parsed = cookie.parse(header);
   return parsed["vlab_rt"] || null;
 }

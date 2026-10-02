@@ -3,15 +3,20 @@ export interface SecurityHeader {
   value: string;
 }
 
+// connect-src includes cdn.jsdelivr.net so the Pyodide web worker can fetch
+// numpy / scipy / matplotlib wheels from the jsDelivr CDN mirror.
 export const DOCUMENT_CSP =
-  "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests";
+  "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://cdn.jsdelivr.net; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests";
 
 export const WORKER_CSP =
-  "default-src 'none'; script-src 'self' 'wasm-unsafe-eval' 'unsafe-eval'; connect-src 'self'; worker-src 'none'; img-src 'none'; style-src 'none'";
+  "default-src 'none'; script-src 'self' 'wasm-unsafe-eval' 'unsafe-eval'; connect-src 'self' https://cdn.jsdelivr.net; worker-src 'none'; img-src 'none'; style-src 'none'";
 
 export const GLOBAL_SECURITY_HEADERS: SecurityHeader[] = [
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
-  { key: "Cross-Origin-Embedder-Policy", value: "require-corp" },
+  // credentialless preserves cross-origin isolation (SharedArrayBuffer works)
+  // while allowing cross-origin no-cors fetches (needed for CDN wheel downloads
+  // from jsDelivr which does not set Cross-Origin-Resource-Policy: cross-origin).
+  { key: "Cross-Origin-Embedder-Policy", value: "credentialless" },
   { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
   { key: "X-Content-Type-Options", value: "nosniff" },

@@ -75,14 +75,19 @@ export class WorkerManager {
           return;
         }
 
-        if (msg.type === "RUN_COMPLETED" || msg.type === "RUN_FAILED" || msg.type === "RUN_CANCELLED") {
+        if (
+          msg.type === "RUN_COMPLETED" ||
+          msg.type === "RUN_FAILED" ||
+          msg.type === "RUN_CANCELLED"
+        ) {
           this.clearRunTimeout();
           this.currentRunId = null;
         }
 
         this.dispatch(msg);
-      } catch {
-        // Discard malformed worker messages
+      } catch (validationErr) {
+        // eslint-disable-next-line no-console
+        console.warn("Discarded malformed worker message:", event.data, validationErr);
       }
     };
 
