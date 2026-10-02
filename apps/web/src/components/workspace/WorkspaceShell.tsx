@@ -7,19 +7,31 @@ import { MonacoCodeEditor } from "./MonacoCodeEditor.js";
 import { ConsolePane } from "./ConsolePane.js";
 import { PlotPane } from "./PlotPane.js";
 import { VariablesPane } from "./VariablesPane.js";
+import { SubmitAssignmentModal } from "./SubmitAssignmentModal.js";
 
 interface WorkspaceShellProps {
   theme: "light" | "dark";
   onToggleTheme: () => void;
+  onNavigateView?: (view: "workspace" | "catalog" | "professor") => void;
 }
 
-export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({ theme, onToggleTheme }) => {
+export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
+  theme,
+  onToggleTheme,
+  onNavigateView,
+}) => {
   const [cursorPosition, setCursorPosition] = useState({ lineNumber: 1, column: 1 });
+  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
 
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-app text-fg">
       {/* TopBar Header (48px) */}
-      <TopBar theme={theme} onToggleTheme={onToggleTheme} />
+      <TopBar
+        theme={theme}
+        onToggleTheme={onToggleTheme}
+        onNavigateView={onNavigateView}
+        onOpenSubmitModal={() => setIsSubmitModalOpen(true)}
+      />
 
       {/* Main Split-Pane Workspace Grid (react-resizable-panels) */}
       <main className="flex-1 w-full overflow-hidden relative">
@@ -71,6 +83,12 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({ theme, onToggleT
 
       {/* StatusBar Footer (24px) */}
       <StatusBar cursorPosition={cursorPosition} />
+
+      {/* Student Assignment Submission Modal */}
+      <SubmitAssignmentModal
+        isOpen={isSubmitModalOpen}
+        onClose={() => setIsSubmitModalOpen(false)}
+      />
     </div>
   );
 };

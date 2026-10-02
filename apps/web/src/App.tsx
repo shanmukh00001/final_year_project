@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import "./styles/index.css";
 import { WorkspaceShell } from "./components/workspace/WorkspaceShell.js";
 import { Catalog } from "./pages/Catalog.js";
+import { ProfessorDashboard } from "./pages/ProfessorDashboard.js";
 import { useWorkspaceStore } from "./store/workspaceStore.js";
 import { getExperimentById } from "./data/curriculum/index.js";
+import { ArrowLeft } from "lucide-react";
 
 export function App() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [currentView, setCurrentView] = useState<"catalog" | "workspace">("workspace");
+  const [currentView, setCurrentView] = useState<"catalog" | "workspace" | "professor">("workspace");
   const initWorkspace = useWorkspaceStore((s) => s.initWorkspace);
 
   useEffect(() => {
@@ -31,10 +33,62 @@ export function App() {
   };
 
   if (currentView === "catalog") {
-    return <Catalog onSelectExperiment={handleSelectExperiment} />;
+    return (
+      <div className="relative min-h-screen">
+        <div className="sticky top-0 z-40 flex items-center justify-between border-b border-line bg-surface px-6 py-2">
+          <button
+            type="button"
+            onClick={() => setCurrentView("workspace")}
+            className="flex items-center gap-1.5 rounded-lg border border-line bg-surface-2 px-3 py-1.5 text-xs font-semibold text-fg hover:bg-hover transition"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Return to Simulation Workspace</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setCurrentView("professor")}
+            className="rounded-lg bg-brand/10 border border-brand/20 px-3 py-1.5 text-xs font-semibold text-brand hover:bg-brand hover:text-white transition"
+          >
+            Faculty Portal
+          </button>
+        </div>
+        <Catalog onSelectExperiment={handleSelectExperiment} />
+      </div>
+    );
   }
 
-  return <WorkspaceShell theme={theme} onToggleTheme={toggleTheme} />;
+  if (currentView === "professor") {
+    return (
+      <div className="relative min-h-screen">
+        <div className="sticky top-0 z-40 flex items-center justify-between border-b border-line bg-surface px-6 py-2">
+          <button
+            type="button"
+            onClick={() => setCurrentView("workspace")}
+            className="flex items-center gap-1.5 rounded-lg border border-line bg-surface-2 px-3 py-1.5 text-xs font-semibold text-fg hover:bg-hover transition"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Return to Simulation Workspace</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setCurrentView("catalog")}
+            className="rounded-lg border border-line bg-surface-2 px-3 py-1.5 text-xs font-semibold text-fg hover:bg-hover transition"
+          >
+            Browse Catalog
+          </button>
+        </div>
+        <ProfessorDashboard onNavigateToWorkspace={handleSelectExperiment} />
+      </div>
+    );
+  }
+
+  return (
+    <WorkspaceShell
+      theme={theme}
+      onToggleTheme={toggleTheme}
+      onNavigateView={(view) => setCurrentView(view)}
+    />
+  );
 }
 
 export default App;

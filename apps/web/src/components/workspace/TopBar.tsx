@@ -1,5 +1,17 @@
 import React from "react";
-import { Play, Square, RotateCcw, Trash2, Download, Moon, Sun, Zap } from "lucide-react";
+import {
+  Play,
+  Square,
+  RotateCcw,
+  Trash2,
+  Download,
+  Moon,
+  Sun,
+  Zap,
+  BookOpen,
+  GraduationCap,
+  Send,
+} from "lucide-react";
 import { useWorkspaceStore } from "../../store/workspaceStore.js";
 import { EngineStatusPill } from "./EngineStatusPill.js";
 import { VALIDATED_EXPERIMENTS } from "../../data/curriculum/index.js";
@@ -7,9 +19,16 @@ import { VALIDATED_EXPERIMENTS } from "../../data/curriculum/index.js";
 interface TopBarProps {
   theme: "light" | "dark";
   onToggleTheme: () => void;
+  onNavigateView?: ((view: "workspace" | "catalog" | "professor") => void) | undefined;
+  onOpenSubmitModal?: (() => void) | undefined;
 }
 
-export const TopBar: React.FC<TopBarProps> = ({ theme, onToggleTheme }) => {
+export const TopBar: React.FC<TopBarProps> = ({
+  theme,
+  onToggleTheme,
+  onNavigateView,
+  onOpenSubmitModal,
+}) => {
   const {
     experimentId,
     engineStatus,
@@ -85,6 +104,30 @@ export const TopBar: React.FC<TopBarProps> = ({ theme, onToggleTheme }) => {
               title="Unsaved changes (autosaving...)"
             />
           )}
+        </div>
+
+        {/* View Switcher Pills */}
+        <div className="flex items-center gap-1 border-l border-line pl-2 ml-1">
+          <button
+            type="button"
+            data-testid="btn-nav-catalog"
+            onClick={() => onNavigateView?.("catalog")}
+            className="flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-fg-muted hover:bg-hover hover:text-fg transition"
+            title="Open ECE Experiment Catalog"
+          >
+            <BookOpen className="h-3 w-3 text-brand" />
+            <span>Catalog</span>
+          </button>
+          <button
+            type="button"
+            data-testid="btn-nav-professor"
+            onClick={() => onNavigateView?.("professor")}
+            className="flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-fg-muted hover:bg-hover hover:text-fg transition"
+            title="Open Professor & Faculty Portal"
+          >
+            <GraduationCap className="h-3.5 w-3.5 text-accent-500" />
+            <span>Faculty</span>
+          </button>
         </div>
       </div>
 
@@ -168,6 +211,16 @@ export const TopBar: React.FC<TopBarProps> = ({ theme, onToggleTheme }) => {
         <div className="h-4 w-px bg-line" />
 
         <div className="flex items-center gap-1">
+          <button
+            type="button"
+            data-testid="btn-submit-lab"
+            onClick={onOpenSubmitModal}
+            className="flex items-center gap-1.5 rounded bg-brand/10 border border-brand/20 px-2.5 py-1 text-brand font-semibold text-xs transition hover:bg-brand hover:text-white"
+            title="Submit experiment results for academic assessment"
+          >
+            <Send className="h-3 w-3" />
+            <span>Submit Lab</span>
+          </button>
           <button
             type="button"
             data-testid="btn-export-py"
