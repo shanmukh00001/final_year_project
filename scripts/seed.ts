@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import bcrypt from "bcryptjs";
 import { connectDb, disconnectDb } from "../apps/api/src/config/db.js";
 import { User } from "../apps/api/src/models/User.js";
@@ -20,7 +21,7 @@ async function seedDatabase() {
   const userPasswordHash = await bcrypt.hash("123456", saltRounds);
 
   // 1. Create Admin
-  const admin = await User.create({
+  const _admin = await User.create({
     email: "admin@iitism.ac.in",
     passwordHash: adminPasswordHash,
     name: "System Admin",
@@ -60,7 +61,7 @@ async function seedDatabase() {
     ],
   });
 
-  const ssCourse = await Course.create({
+  const _ssCourse = await Course.create({
     code: "SS",
     name: "Signals and Systems",
     level: "UG",
@@ -74,7 +75,7 @@ async function seedDatabase() {
     ],
   });
 
-  const dipCourse = await Course.create({
+  const _dipCourse = await Course.create({
     code: "DIP",
     name: "Digital Image Processing",
     level: "PG",
@@ -91,7 +92,7 @@ async function seedDatabase() {
   const sectionId = dspCourse.sections[0]._id;
 
   // 4. Create Student (23JE0638)
-  const student = await User.create({
+  const _student = await User.create({
     email: "23je0638@students.iitism.ac.in",
     passwordHash: userPasswordHash,
     name: "Shanmukh",
