@@ -1,7 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "pnpm turbo run build",
+  "outputDirectory": "apps/web/dist",
   "regions": ["bom1"],
-  "git": { "deploymentEnabled": { "main": false } },
   "functions": {
     "api/index.ts": { "maxDuration": 10, "includeFiles": "apps/api/dist/**" }
   },
