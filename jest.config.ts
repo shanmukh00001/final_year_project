@@ -23,6 +23,7 @@ const config: Config = {
       displayName: "api",
       testEnvironment: "node",
       rootDir: "apps/api",
+      setupFiles: ["<rootDir>/test/env.setup.ts"],
       testMatch: ["<rootDir>/src/**/*.test.ts", "<rootDir>/test/**/*.test.ts"],
       transform: { "^.+\\.[tj]sx?$": swc },
       transformIgnorePatterns: ["node_modules[\\\\/](?!(\\.pnpm|jose)[\\\\/])"],
