@@ -13,6 +13,13 @@ export class HttpError extends Error {
   }
 }
 
+export class AppError extends HttpError {
+  constructor(code: ErrorCode, message: string, statusCode: number = 400, details?: unknown[]) {
+    super(statusCode, code, message, details);
+    this.name = "AppError";
+  }
+}
+
 export function errorHandler(
   err: unknown,
   req: Request & { id?: string },

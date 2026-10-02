@@ -4,6 +4,10 @@ import cors from "cors";
 import { requestIdMiddleware } from "./middleware/requestId.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { healthRouter } from "./routes/health.js";
+import { authRouter } from "./routes/auth.js";
+import { workspacesRouter } from "./routes/workspaces.js";
+import { assignmentsRouter } from "./routes/assignments.js";
+import { professorRouter } from "./routes/professor.js";
 
 export function createApp(): Express {
   const app = express();
@@ -22,6 +26,10 @@ export function createApp(): Express {
 
   // Mount API routes
   app.use("/api", healthRouter);
+  app.use("/api/auth", authRouter);
+  app.use("/api/workspaces", workspacesRouter);
+  app.use("/api/assignments", assignmentsRouter);
+  app.use("/api", professorRouter);
 
   // Error handling
   app.use(errorHandler);

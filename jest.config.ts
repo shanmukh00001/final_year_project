@@ -24,7 +24,11 @@ const config: Config = {
       testEnvironment: "node",
       rootDir: "apps/api",
       testMatch: ["<rootDir>/src/**/*.test.ts", "<rootDir>/test/**/*.test.ts"],
-      transform: { "^.+\\.tsx?$": swc },
+      transform: { "^.+\\.[tj]sx?$": swc },
+      transformIgnorePatterns: ["node_modules[\\\\/](?!(\\.pnpm|jose)[\\\\/])"],
+      moduleNameMapper: {
+        "^(\\.{1,2}/.*)\\.js$": "$1",
+      },
     },
     {
       displayName: "web",

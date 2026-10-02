@@ -2,6 +2,7 @@
 trigger: always_on
 description: "Core architectural constraints and instructions for V-Lab ECE."
 ---
+
 # GLOBAL AGENT RULES (V-Lab ECE)
 
 1. **The Docs are Law:** The `/docs` directory is the single source of truth. If a rule here conflicts with `/docs`, `/docs` wins.
