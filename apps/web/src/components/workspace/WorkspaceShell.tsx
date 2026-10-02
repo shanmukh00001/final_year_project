@@ -12,7 +12,7 @@ import { SubmitAssignmentModal } from "./SubmitAssignmentModal.js";
 interface WorkspaceShellProps {
   theme: "light" | "dark";
   onToggleTheme: () => void;
-  onNavigateView?: (view: "workspace" | "catalog" | "professor") => void;
+  onNavigateView?: ((view: "workspace" | "catalog" | "professor" | "admin") => void) | undefined;
 }
 
 export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({

@@ -11,6 +11,7 @@ import {
   BookOpen,
   GraduationCap,
   Send,
+  Shield,
 } from "lucide-react";
 import { useWorkspaceStore } from "../../store/workspaceStore.js";
 import { EngineStatusPill } from "./EngineStatusPill.js";
@@ -19,7 +20,7 @@ import { VALIDATED_EXPERIMENTS } from "../../data/curriculum/index.js";
 interface TopBarProps {
   theme: "light" | "dark";
   onToggleTheme: () => void;
-  onNavigateView?: ((view: "workspace" | "catalog" | "professor") => void) | undefined;
+  onNavigateView?: ((view: "workspace" | "catalog" | "professor" | "admin") => void) | undefined;
   onOpenSubmitModal?: (() => void) | undefined;
 }
 
@@ -127,6 +128,16 @@ export const TopBar: React.FC<TopBarProps> = ({
           >
             <GraduationCap className="h-3.5 w-3.5 text-accent-500" />
             <span>Faculty</span>
+          </button>
+          <button
+            type="button"
+            data-testid="btn-nav-admin"
+            onClick={() => onNavigateView?.("admin")}
+            className="flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-fg-muted hover:bg-hover hover:text-fg transition"
+            title="Open Institutional Admin Portal"
+          >
+            <Shield className="h-3.5 w-3.5 text-blue-500" />
+            <span>Admin</span>
           </button>
         </div>
       </div>
