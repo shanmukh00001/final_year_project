@@ -14,6 +14,7 @@ export function App() {
     "workspace",
   );
   const initWorkspace = useWorkspaceStore((s) => s.initWorkspace);
+  const loadExperiment = useWorkspaceStore((s) => s.loadExperiment);
 
   useEffect(() => {
     // Initialize Pyodide engine and default DSP-03 workspace
@@ -24,7 +25,7 @@ export function App() {
   const handleSelectExperiment = (id: string) => {
     const exp = getExperimentById(id);
     if (exp) {
-      initWorkspace(exp.id, exp.starterCode);
+      loadExperiment(exp.id);
       setCurrentView("workspace");
     }
   };

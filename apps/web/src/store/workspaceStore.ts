@@ -397,6 +397,9 @@ vlab.plot(t, sig, label="Filtered Signal", title="FIR Filter Simulation")
     set({
       engineStatus: "running",
       activeError: null,
+      declaredParams: {},
+      figures: [],
+      activeFigureId: null,
       consoleLines: [...state.consoleLines, startLine].slice(-MAX_CONSOLE_LINES),
     });
 
