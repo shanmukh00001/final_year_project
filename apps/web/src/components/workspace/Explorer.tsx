@@ -41,9 +41,6 @@ export const Explorer: React.FC = () => {
               <span className="font-mono">main.py</span>
               <span className="text-[10px] text-fg-subtle">(active)</span>
             </div>
-            <div className="flex items-center gap-2 rounded px-2 py-1 text-fg-muted hover:bg-hover">
-              <span className="font-mono">signals.py</span>
-            </div>
           </div>
         )}
       </div>

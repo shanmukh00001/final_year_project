@@ -74,24 +74,24 @@ export const TopBar: React.FC<TopBarProps> = ({
   const isReady = engineStatus === "ready";
 
   return (
-    <header className="flex h-12 w-full items-center justify-between border-b border-line bg-surface px-4 text-fg shadow-panel select-none">
+    <header className="flex h-12 w-full items-center justify-between border-b border-line bg-surface px-3 text-fg shadow-panel select-none overflow-hidden shrink-0">
       {/* Left: Brand & Experiment switcher */}
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 font-bold tracking-tight">
-          <span className="flex h-7 w-7 items-center justify-center rounded-md bg-brand text-white font-mono text-xs">
+      <div className="flex items-center gap-2 min-w-0 shrink">
+        <div className="flex items-center gap-1.5 font-bold tracking-tight shrink-0">
+          <span className="flex h-6 w-6 items-center justify-center rounded bg-brand text-white font-mono text-[11px]">
             VL
           </span>
-          <span className="font-semibold text-sm">V-Lab ECE</span>
+          <span className="font-semibold text-xs hidden sm:inline">V-Lab ECE</span>
         </div>
 
-        <span className="text-fg-subtle">/</span>
+        <span className="text-fg-subtle text-xs shrink-0">/</span>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 min-w-0 max-w-[280px] md:max-w-[340px] shrink">
           <select
             data-testid="select-experiment"
             value={experimentId}
             onChange={(e) => loadExperiment(e.target.value)}
-            className="rounded bg-surface-2 border border-line px-2 py-1 font-mono font-medium text-fg text-xs focus:outline-none focus:ring-1 focus:ring-brand cursor-pointer"
+            className="w-full truncate rounded bg-surface-2 border border-line px-2 py-1 font-mono font-medium text-fg text-xs focus:outline-none focus:ring-1 focus:ring-brand cursor-pointer"
           >
             {VALIDATED_EXPERIMENTS.map((exp) => (
               <option key={exp.id} value={exp.id}>
@@ -101,14 +101,14 @@ export const TopBar: React.FC<TopBarProps> = ({
           </select>
           {unsavedChanges && (
             <span
-              className="h-2 w-2 rounded-full bg-amber-500"
+              className="h-2 w-2 rounded-full bg-amber-500 shrink-0"
               title="Unsaved changes (autosaving...)"
             />
           )}
         </div>
 
         {/* View Switcher Pills */}
-        <div className="flex items-center gap-1 border-l border-line pl-2 ml-1">
+        <div className="hidden lg:flex items-center gap-1 border-l border-line pl-2 ml-1 shrink-0">
           <button
             type="button"
             data-testid="btn-nav-catalog"
