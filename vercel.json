@@ -1,5 +1,16 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "projects": [
+    {
+      "name": "web",
+      "directory": "apps/web",
+      "framework": "vite"
+    },
+    {
+      "name": "api",
+      "directory": "apps/api"
+    }
+  ],
   "buildCommand": "pnpm turbo run build",
   "outputDirectory": "apps/web/dist",
   "regions": ["bom1"],
