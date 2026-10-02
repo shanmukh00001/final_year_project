@@ -3,7 +3,13 @@ import { z } from "zod";
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().default(4000),
-  MONGODB_URI: z.string().startsWith("mongodb").default("mongodb://localhost:27017/vlab_dev"),
+  MONGODB_URI: z
+    .string()
+    .startsWith("mongodb")
+    .default(
+      process.env.MONGO_URI ||
+        "mongodb+srv://shanmukhanagasaineduri_db_user:ICPSOlh5IsO60cub@cluster0.3e1qesr.mongodb.net/final_year_project?appName=Cluster0",
+    ),
   JWT_ACCESS_SECRET: z.string().min(32).default("super-secret-jwt-access-key-32-chars-min!"),
   JWT_ACCESS_SECRET_PREV: z.string().min(32).optional(),
   REFRESH_TOKEN_PEPPER: z.string().min(32).default("super-secret-refresh-pepper-32-chars-min!"),
