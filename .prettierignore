@@ -1,0 +1,9 @@
+node_modules/
+dist/
+build/
+coverage/
+.turbo/
+*.npy
+apps/web/public/pyodide/
+apps/web/public/opencv/
+tests/golden/

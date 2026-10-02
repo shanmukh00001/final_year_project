@@ -1,0 +1,23 @@
+{
+  "name": "@vlab/shared",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./limits": "./src/limits.ts",
+    "./errors": "./src/errors.ts",
+    "./protocol": "./src/protocol.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "3.25.7"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
+}

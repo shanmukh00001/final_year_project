@@ -1,0 +1,76 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+env:
+  TURBO_TELEMETRY_DISABLED: "1"
+  CI: "true"
+
+jobs:
+  static:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 12 }
+      - uses: actions/setup-node@v4
+        with: { node-version-file: .nvmrc, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm turbo run typecheck
+      - run: pnpm lint
+      - run: pnpm format:check
+      - run: pnpm validate-experiments
+      - run: pnpm check:vercel-json
+      - run: pnpm engine-pin-check
+
+  unit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [shared, web, api]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 12 }
+      - uses: actions/setup-node@v4
+        with: { node-version-file: .nvmrc, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm jest --selectProjects ${{ matrix.project }} --ci
+
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    needs: [static, unit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 12 }
+      - uses: actions/setup-node@v4
+        with: { node-version-file: .nvmrc, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm turbo run build --filter=@vlab/web --filter=@vlab/api
+      - run: pnpm check:bundle-size
+      - run: pnpm check:deploy-size
+      - run: pnpm check:no-test-hooks
+
+  ac-coverage:
+    runs-on: ubuntu-24.04
+    needs: [unit]
+    if: always() && !cancelled()
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 12 }
+      - uses: actions/setup-node@v4
+        with: { node-version-file: .nvmrc, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm ac-coverage

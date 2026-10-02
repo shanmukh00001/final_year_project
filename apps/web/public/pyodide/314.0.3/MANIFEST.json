@@ -1,0 +1,15 @@
+{
+  "console.html": "fbc479954249200c6ecb891057d6dd177dd1b469ba5a39ffe415a479244532a6",
+  "ffi.d.ts": "fe14facef7e03cf6adc7f305032485e7520413fca8e470f74d7cb52dab45333c",
+  "package.json": "9a2b698ddb1849c391adfe6cf56aed6381b1fe5924c0cb38a4aa51ee01529d93",
+  "pyodide-lock.json": "bb75898cd30da9530e25a9cb7336755db7c3cc85ddd0e3da20ae794a589b3972",
+  "pyodide.asm.js": "0ea527c5d589df084d79f306ddc9f99f1f67bb7d6529008c10d1a324a1a6dc22",
+  "pyodide.asm.wasm": "abf462b9236af720a276be5a9db980aa31871972a323525abd33c1978cf844ce",
+  "pyodide.d.ts": "d26f1a5e144478b6cdd7c64521f1c5e3ddf68b17a81ef57dffaee6edc00d3877",
+  "pyodide.js": "2068fc5f28b13fc31193b0075d55a1000312c47897f7efb0051d028496f4a731",
+  "pyodide.js.map": "6530a964e8aa738d3d791de209683e1b71ec4ffa7c1855b7a733d1c093143e69",
+  "pyodide.mjs": "9f54a615c20b2aeb0514d25adbd5ae4c098f8604be1291959e760b6e85e8bc36",
+  "pyodide.mjs.map": "103a886589cb0b0a1f915738f92ab5c1d955f4bd29df42c3841d9661a99c0e85",
+  "python_stdlib.zip": "cad21b7df47ac3d6efe8d97f0654feec8a51b089046100e9d21fba5954700a21",
+  "README.md": "7d434f487a81a9ea4944000fbbb5a771da89ca32fd1ff5edca0c5954b90cedec"
+}
