@@ -34,11 +34,15 @@ const config: Config = {
       displayName: "web",
       testEnvironment: "jsdom",
       rootDir: "apps/web",
-      testMatch: ["<rootDir>/src/**/*.test.{ts,tsx}"],
+      testMatch: [
+        "<rootDir>/src/**/*.test.{ts,tsx}",
+        "<rootDir>/test/**/*.test.{ts,tsx}",
+      ],
       transform: { "^.+\\.tsx?$": swc },
       moduleNameMapper: {
         "^@/(.*)$": "<rootDir>/src/$1",
         "\\.css$": "<rootDir>/test/styleMock.ts",
+        "^(\\.{1,2}/.*)\\.js$": "$1",
       },
     },
     {
