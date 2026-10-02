@@ -8,7 +8,8 @@ const envSchema = z.object({
     .startsWith("mongodb")
     .default(
       process.env["MONGO_URI"] ||
-        "mongodb+srv://shanmukhanagasaineduri_db_user:ICPSOlh5IsO60cub@cluster0.3e1qesr.mongodb.net/final_year_project?appName=Cluster0",
+        process.env["MONGODB_URI"] ||
+        "mongodb://localhost:27017/final_year_project",
     ),
   JWT_ACCESS_SECRET: z.string().min(32).default("super-secret-jwt-access-key-32-chars-min!"),
   JWT_ACCESS_SECRET_PREV: z.string().min(32).optional(),
