@@ -85,8 +85,8 @@ import numpy as np
 from scipy import signal
 import vlab
 
-fc = vlab.param("fc", 0.3, 0.05, 0.95, 0.05, label="Cutoff Frequency (normalized)")
-numtaps = vlab.param("numtaps", 51, 11, 101, 2, kind="number", label="Filter Taps")
+fc = vlab.param("fc", 0.3, 0.01, 0.99, 0.01, label="Cutoff Frequency (normalized)")
+numtaps = vlab.param("numtaps", 51, 3, 1001, 2, kind="number", label="Filter Taps")
 
 h = signal.firwin(int(numtaps), float(fc), window="hamming")
 w, H = signal.freqz(h, worN=512)

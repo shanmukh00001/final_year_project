@@ -97,8 +97,8 @@ export const Explorer: React.FC = () => {
                           type="range"
                           data-testid={`param-slider-${name}`}
                           min={decl.min ?? 0}
-                          max={decl.max ?? 100}
-                          step={decl.step ?? 1}
+                          max={decl.max ?? 1000}
+                          step={decl.step ?? "any"}
                           value={Number(currentVal)}
                           onChange={(e) => setParamValue(name, parseFloat(e.target.value))}
                           className="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-line accent-brand"
@@ -107,11 +107,10 @@ export const Explorer: React.FC = () => {
                           type="number"
                           data-testid={`param-input-${name}`}
                           min={decl.min ?? 0}
-                          max={decl.max ?? 100}
-                          step={decl.step ?? 1}
+                          step={decl.step ?? "any"}
                           value={Number(currentVal)}
                           onChange={(e) => setParamValue(name, parseFloat(e.target.value) || 0)}
-                          className="w-14 rounded border border-line bg-surface px-1 py-0.5 font-mono text-[10px] text-right"
+                          className="w-16 rounded border border-line bg-surface px-1 py-0.5 font-mono text-[10px] text-right"
                         />
                       </div>
                     ) : decl.kind === "select" && decl.options ? (
