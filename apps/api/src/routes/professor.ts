@@ -415,3 +415,51 @@ professorRouter.get(
     }
   },
 );
+
+// GET /api/professor/assignments/:id/similarity
+professorRouter.get(
+  "/professor/assignments/:id/similarity",
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const asg = await LabAssignment.findById(id);
+      if (!asg) {
+        throw new AppError("E_NOT_FOUND", "Assignment not found", 404);
+      }
+
+      if (req.user!.role !== "admin" && asg.createdBy.toString() !== req.user!.id) {
+        throw new AppError("E_FORBIDDEN", "Not authorized for this assignment", 403);
+      }
+
+      const submissions = await Submission.find({ assignmentId: asg._id }).populate("studentId");
+
+      const submissionData = submissions.map((s) => {
+        const u = s.studentId as unknown as { fullName?: string; rollNumber?: string; email?: string } | null;
+        const files = s.snapshot?.files || [];
+        const mainFile = files.find((f) => f.path === "main.py") || files[0];
+        return {
+          id: s._id.toString(),
+          studentName: u?.fullName || "Student",
+          studentRoll: u?.rollNumber || u?.email || "Unknown",
+          code: mainFile ? mainFile.content : "",
+        };
+      });
+
+      const { analyzeBatchSimilarity } = await import("../services/similarity.service.js");
+      const pairs = analyzeBatchSimilarity(submissionData, 0.8);
+      const flaggedCount = pairs.filter((p) => p.isPlagiarized).length;
+
+      res.status(200).json({
+        data: {
+          assignmentId: id,
+          totalSubmissionsAnalyzed: submissionData.length,
+          flaggedPairsCount: flaggedCount,
+          pairs,
+        },
+        meta: { requestId: req.requestId },
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+);

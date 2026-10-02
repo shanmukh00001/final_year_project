@@ -5,6 +5,21 @@ import { AdminDashboard } from "../src/pages/AdminDashboard.js";
 import { CsvImportModal } from "../src/components/admin/CsvImportModal.js";
 import { ImageInspector } from "../src/components/workspace/ImageInspector.js";
 
+// Mock Canvas 2D context for JSDOM
+beforeAll(() => {
+  HTMLCanvasElement.prototype.getContext = jest.fn(() => ({
+    createImageData: (w: number, h: number) => ({
+      data: new Uint8ClampedArray(w * h * 4),
+      width: w,
+      height: h,
+    }),
+    putImageData: jest.fn(),
+    getImageData: jest.fn(() => ({
+      data: new Uint8ClampedArray([128, 128, 128, 255]),
+    })),
+  })) as unknown as typeof HTMLCanvasElement.prototype.getContext;
+});
+
 describe("Milestone 3: Admin Console & DIP Image Inspector Suite", () => {
   test("renders Admin Dashboard with vitals, user directory, and audit logs", () => {
     render(<AdminDashboard />);
