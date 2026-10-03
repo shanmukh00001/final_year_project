@@ -6,7 +6,11 @@ const envSchema = z.object({
   MONGODB_URI: z
     .string()
     .startsWith("mongodb")
-    .default(process.env["MONGODB_URI"] ?? ""),
+    .default(
+      process.env["MONGO_URI"] ||
+        process.env["MONGODB_URI"] ||
+        "mongodb://localhost:27017/final_year_project",
+    ),
   JWT_ACCESS_SECRET: z.string().min(32).default("super-secret-jwt-access-key-32-chars-min!"),
   JWT_ACCESS_SECRET_PREV: z.string().min(32).optional(),
   REFRESH_TOKEN_PEPPER: z.string().min(32).default("super-secret-refresh-pepper-32-chars-min!"),

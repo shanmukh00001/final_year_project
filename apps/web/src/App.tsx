@@ -1,12 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import "./styles/index.css";
 import { WorkspaceShell } from "./components/workspace/WorkspaceShell.js";
-import { Catalog } from "./pages/Catalog.js";
-import { ProfessorDashboard } from "./pages/ProfessorDashboard.js";
-import { AdminDashboard } from "./pages/AdminDashboard.js";
 import { useWorkspaceStore } from "./store/workspaceStore.js";
 import { getExperimentById } from "./data/curriculum/index.js";
 import { ArrowLeft } from "lucide-react";
+
+const Catalog = lazy(() => import("./pages/Catalog.js").then((m) => ({ default: m.Catalog })));
+const ProfessorDashboard = lazy(() =>
+  import("./pages/ProfessorDashboard.js").then((m) => ({ default: m.ProfessorDashboard })),
+);
+const AdminDashboard = lazy(() =>
+  import("./pages/AdminDashboard.js").then((m) => ({ default: m.AdminDashboard })),
+);
 
 export function App() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -65,7 +70,11 @@ export function App() {
             </button>
           </div>
         </div>
-        <Catalog onSelectExperiment={handleSelectExperiment} />
+        <Suspense
+          fallback={<div className="p-8 text-center text-sm text-fg-muted">Loading Catalog...</div>}
+        >
+          <Catalog onSelectExperiment={handleSelectExperiment} />
+        </Suspense>
       </div>
     );
   }
@@ -99,7 +108,13 @@ export function App() {
             </button>
           </div>
         </div>
-        <ProfessorDashboard onNavigateToWorkspace={handleSelectExperiment} />
+        <Suspense
+          fallback={
+            <div className="p-8 text-center text-sm text-fg-muted">Loading Faculty Portal...</div>
+          }
+        >
+          <ProfessorDashboard onNavigateToWorkspace={handleSelectExperiment} />
+        </Suspense>
       </div>
     );
   }
@@ -133,7 +148,13 @@ export function App() {
             </button>
           </div>
         </div>
-        <AdminDashboard />
+        <Suspense
+          fallback={
+            <div className="p-8 text-center text-sm text-fg-muted">Loading Admin Portal...</div>
+          }
+        >
+          <AdminDashboard />
+        </Suspense>
       </div>
     );
   }

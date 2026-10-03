@@ -43,6 +43,43 @@ export default defineConfig({
     port: 4173,
     headers: prodHeadersRecord,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (
+            id.includes("node_modules/monaco-editor") ||
+            id.includes("node_modules/@monaco-editor")
+          ) {
+            return "monaco";
+          }
+          if (
+            id.includes("node_modules/plotly.js") ||
+            id.includes("node_modules/plotly.js-dist-min")
+          ) {
+            return "plotly";
+          }
+          if (id.includes("node_modules/pyodide")) {
+            return "pyodide";
+          }
+          if (
+            id.includes("node_modules/katex") ||
+            id.includes("node_modules/react-markdown") ||
+            id.includes("node_modules/rehype-katex") ||
+            id.includes("node_modules/remark")
+          ) {
+            return "markdown";
+          }
+          if (id.includes("node_modules/lucide-react")) {
+            return "icons";
+          }
+          if (id.includes("node_modules")) {
+            return "vendor";
+          }
+        },
+      },
+    },
+  },
   worker: {
     format: "es",
     rollupOptions: {
