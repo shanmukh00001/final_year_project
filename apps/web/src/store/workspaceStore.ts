@@ -9,7 +9,7 @@ import {
   MAX_CONSOLE_LINES,
 } from "@vlab/shared";
 import { WorkerManager } from "../engine/WorkerManager.js";
-import { saveLocalDraft, getLocalDraft } from "../lib/idb/drafts.js";
+import { saveLocalDraft, getLocalDraft, getLocalDraftSync } from "../lib/idb/drafts.js";
 
 import { getExperimentById } from "../data/curriculum/index.js";
 
@@ -55,6 +55,7 @@ export interface WorkspaceState {
   initWorkspace: (experimentId: string, initialCode?: string) => void;
   loadExperiment: (id: string) => void;
   setCode: (code: string) => void;
+  saveCurrentDraft: () => void;
   setLiveRun: (enabled: boolean) => void;
   setParamValue: (name: string, value: ParamValue) => void;
   runCode: () => void;
@@ -70,28 +71,51 @@ let workerManagerInstance: WorkerManager | null = null;
 let autosaveTimeout: ReturnType<typeof setTimeout> | null = null;
 let liveRunDebounceTimeout: ReturnType<typeof setTimeout> | null = null;
 
+function getInitialActiveExperimentId(): string {
+  try {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlExp = urlParams.get("exp");
+      if (urlExp && getExperimentById(urlExp)) {
+        return urlExp;
+      }
+      const storedExp = localStorage.getItem("vlab_active_experiment");
+      if (storedExp && getExperimentById(storedExp)) {
+        return storedExp;
+      }
+    }
+  } catch {
+    // Ignore storage errors
+  }
+  return "DSP-03";
+}
+
+const initialBootExpId = getInitialActiveExperimentId();
+const initialBootExp = getExperimentById(initialBootExpId);
+const initialBootDraft = getLocalDraftSync(initialBootExpId);
+const initialBootCode = initialBootDraft
+  ? initialBootDraft.code
+  : initialBootExp?.starterCode || `# Experiment ${initialBootExpId}`;
+const initialBootParams: Record<string, ParamValue> = initialBootDraft
+  ? (initialBootDraft.params as Record<string, ParamValue>)
+  : {};
+
+if (initialBootExp && initialBootExp.parameters && !initialBootDraft) {
+  for (const p of initialBootExp.parameters) {
+    initialBootParams[p.name] = p.default;
+  }
+}
+
 export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
-  experimentId: "DSP-03",
-  code: `# Virtual Laboratory - DSP-03 FIR Filter Design
-import numpy as np
-import vlab
-
-fc = vlab.param("fc", 0.3, 0.05, 0.95, 0.05, label="Cutoff Frequency")
-numtaps = vlab.param("numtaps", 51, 11, 101, 2, kind="number", label="Filter Taps")
-
-t = np.linspace(0, 1, 500)
-sig = np.sin(2 * np.pi * 10 * t) + 0.5 * np.sin(2 * np.pi * 50 * t)
-
-print(f"Generating signal with {numtaps} filter taps and cutoff {fc}...")
-vlab.plot(t, sig, label="Filtered Signal", title="FIR Filter Simulation")
-`,
+  experimentId: initialBootExpId,
+  code: initialBootCode,
   engineStatus: "uninitialized",
   bootProgress: { percent: 0, stage: "", message: "" },
   consoleLines: [],
   variables: [],
   figures: [],
   activeFigureId: null,
-  params: {},
+  params: initialBootParams,
   declaredParams: {},
   liveRun: false,
   activeError: null,
@@ -100,9 +124,26 @@ vlab.plot(t, sig, label="Filtered Signal", title="FIR Filter Simulation")
   engineRuntimeInfo: null,
 
   initWorkspace: (experimentId: string, initialCode?: string) => {
+    // Check synchronous draft from localStorage first for instant hydration
+    const syncDraft = getLocalDraftSync(experimentId);
+    const exp = getExperimentById(experimentId);
+    const starter = initialCode || exp?.starterCode || get().code;
+
+    const initialCodeToUse = syncDraft ? syncDraft.code : starter;
+    const initialParams: Record<string, ParamValue> = syncDraft
+      ? (syncDraft.params as Record<string, ParamValue>)
+      : {};
+
+    if (exp && exp.parameters && !syncDraft) {
+      for (const p of exp.parameters) {
+        initialParams[p.name] = p.default;
+      }
+    }
+
     set({
       experimentId,
-      code: initialCode || get().code,
+      code: initialCodeToUse,
+      params: initialParams,
       engineStatus: "booting",
       consoleLines: [
         {
@@ -114,12 +155,25 @@ vlab.plot(t, sig, label="Filtered Signal", title="FIR Filter Simulation")
       ],
     });
 
-    // Try rehydrating local draft
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("vlab_active_experiment", experimentId);
+        const url = new URL(window.location.href);
+        if (url.searchParams.get("exp") !== experimentId) {
+          url.searchParams.set("exp", experimentId);
+          window.history.replaceState({}, "", url.toString());
+        }
+      } catch {
+        // Ignore storage or history errors
+      }
+    }
+
+    // Also double check IndexedDB draft
     void getLocalDraft(experimentId).then((draft) => {
-      if (draft) {
+      if (draft && draft.experimentId === experimentId && get().experimentId === experimentId) {
         set({
           code: draft.code,
-          params: draft.params,
+          params: draft.params as Record<string, ParamValue>,
         });
       }
     });
@@ -285,12 +339,9 @@ vlab.plot(t, sig, label="Filtered Signal", title="FIR Filter Simulation")
   },
 
   loadExperiment: (id: string) => {
-    // Cancel any pending debounced timers from the previous experiment
-    // to avoid stale autosaves or live-run executions contaminating the new one.
-    if (autosaveTimeout) {
-      clearTimeout(autosaveTimeout);
-      autosaveTimeout = null;
-    }
+    // Flush draft for current experiment before switching
+    get().saveCurrentDraft();
+
     if (liveRunDebounceTimeout) {
       clearTimeout(liveRunDebounceTimeout);
       liveRunDebounceTimeout = null;
@@ -302,10 +353,15 @@ vlab.plot(t, sig, label="Filtered Signal", title="FIR Filter Simulation")
       workerManagerInstance.stop();
     }
 
+    const syncDraft = getLocalDraftSync(id);
     const exp = getExperimentById(id);
     const starter = exp ? exp.starterCode : `# Experiment ${id}`;
-    const initialParams: Record<string, ParamValue> = {};
-    if (exp && exp.parameters) {
+    const initialCode = syncDraft ? syncDraft.code : starter;
+    const initialParams: Record<string, ParamValue> = syncDraft
+      ? (syncDraft.params as Record<string, ParamValue>)
+      : {};
+
+    if (exp && exp.parameters && !syncDraft) {
       for (const p of exp.parameters) {
         initialParams[p.name] = p.default;
       }
@@ -313,7 +369,7 @@ vlab.plot(t, sig, label="Filtered Signal", title="FIR Filter Simulation")
 
     set({
       experimentId: id,
-      code: starter,
+      code: initialCode,
       figures: [],
       variables: [],
       activeFigureId: null,
@@ -332,13 +388,26 @@ vlab.plot(t, sig, label="Filtered Signal", title="FIR Filter Simulation")
       ].slice(-MAX_CONSOLE_LINES),
     });
 
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("vlab_active_experiment", id);
+        const url = new URL(window.location.href);
+        if (url.searchParams.get("exp") !== id) {
+          url.searchParams.set("exp", id);
+          window.history.replaceState({}, "", url.toString());
+        }
+      } catch {
+        // Ignore storage or history errors
+      }
+    }
+
     // Check IndexedDB draft for this experiment — only apply if it matches
     void getLocalDraft(id).then((draft) => {
       // Guard: ensure the experiment hasn't changed again since this async call started
       if (draft && draft.experimentId === id && get().experimentId === id) {
         set({
           code: draft.code,
-          params: draft.params,
+          params: draft.params as Record<string, ParamValue>,
         });
       }
     });
@@ -347,20 +416,28 @@ vlab.plot(t, sig, label="Filtered Signal", title="FIR Filter Simulation")
   setCode: (code: string) => {
     set({ code, unsavedChanges: true });
 
-    // Debounced autosave to IndexedDB
+    // Debounced autosave to localStorage and IndexedDB (1s)
     if (autosaveTimeout) {
       clearTimeout(autosaveTimeout);
     }
     autosaveTimeout = setTimeout(() => {
-      const state = get();
-      void saveLocalDraft({
-        experimentId: state.experimentId,
-        code: state.code,
-        params: state.params,
-        updatedAt: Date.now(),
-      });
-      set({ unsavedChanges: false });
-    }, 5000);
+      get().saveCurrentDraft();
+    }, 1000);
+  },
+
+  saveCurrentDraft: () => {
+    if (autosaveTimeout) {
+      clearTimeout(autosaveTimeout);
+      autosaveTimeout = null;
+    }
+    const state = get();
+    void saveLocalDraft({
+      experimentId: state.experimentId,
+      code: state.code,
+      params: state.params,
+      updatedAt: Date.now(),
+    });
+    set({ unsavedChanges: false });
   },
 
   setLiveRun: (enabled: boolean) => {
@@ -467,4 +544,11 @@ if (typeof window !== "undefined") {
   (
     window as unknown as { __vlab_workspace_store: typeof useWorkspaceStore }
   ).__vlab_workspace_store = useWorkspaceStore;
+
+  window.addEventListener("beforeunload", () => {
+    useWorkspaceStore.getState().saveCurrentDraft();
+  });
+  window.addEventListener("pagehide", () => {
+    useWorkspaceStore.getState().saveCurrentDraft();
+  });
 }

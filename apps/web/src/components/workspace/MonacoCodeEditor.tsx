@@ -8,17 +8,31 @@ interface MonacoCodeEditorProps {
   onCursorChange?: (pos: { lineNumber: number; column: number }) => void;
 }
 
+// Concrete monospace font stack for Monaco's canvas font-measurement engine
+const MONACO_FONT_FAMILY =
+  "'JetBrains Mono Variable', 'JetBrains Mono', Consolas, 'SF Mono', Monaco, Menlo, 'Courier New', monospace";
+
 export const MonacoCodeEditor: React.FC<MonacoCodeEditorProps> = ({ theme, onCursorChange }) => {
   const { code, experimentId, engineStatus, setCode, activeError } = useWorkspaceStore();
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<Monaco | null>(null);
-  // Track the experimentId for which the editor model was last synced.
-  const syncedExpId = useRef<string>("");
+  const lastSyncedExpId = useRef<string>(experimentId);
 
-  // ── Keybinding helpers ─────────────────────────────────────────────────────
+  // ── Keybinding helpers & mount setup ──────────────────────────────────────
   const handleEditorDidMount: OnMount = (ed, monaco) => {
     editorRef.current = ed;
     monacoRef.current = monaco;
+
+    // Remeasure fonts as soon as web fonts are fully loaded to prevent cursor drift
+    if (typeof document !== "undefined" && "fonts" in document) {
+      document.fonts.ready.then(() => {
+        try {
+          monaco.editor.remeasureFonts();
+        } catch {
+          // Ignore if editor unmounted
+        }
+      });
+    }
 
     // Ctrl/Cmd + Enter → Run all code
     ed.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
@@ -56,46 +70,52 @@ export const MonacoCodeEditor: React.FC<MonacoCodeEditorProps> = ({ theme, onCur
       });
     });
 
-    // Mark initial sync
-    syncedExpId.current = useWorkspaceStore.getState().experimentId;
+    // Mark initial sync & ensure current store code is applied if different
+    lastSyncedExpId.current = useWorkspaceStore.getState().experimentId;
+    const model = ed.getModel();
+    if (model && model.getValue() !== code) {
+      model.setValue(code);
+    }
   };
 
-  // ── Experiment switch: imperatively update editor model ────────────────────
-  // When experimentId changes we push the new code directly into the editor
-  // model instead of relying on the React re-render cycle.  This avoids the
-  // "value" prop race condition that can leave Monaco displaying stale code or
-  // lose focus / scroll position on slow re-renders.
+  // ── Code synchronization ──────────────────────────────────────────────────
+  // When experimentId changes or store code is updated externally (e.g. draft rehydration),
+  // update the editor model. If the user is typing, model.getValue() === code, so this is a no-op.
   useEffect(() => {
     const ed = editorRef.current;
     const monaco = monacoRef.current;
     if (!ed || !monaco) {
       return;
     }
-    if (syncedExpId.current === experimentId) {
-      return; // nothing changed
+
+    const model = ed.getModel();
+    if (!model) {
+      return;
     }
 
-    // Clear all error markers before replacing the model content
-    const model = ed.getModel();
-    if (model) {
+    const isDifferentExp = lastSyncedExpId.current !== experimentId;
+    const currentModelVal = model.getValue();
+
+    if (isDifferentExp) {
       monaco.editor.setModelMarkers(model, "vlab", []);
-      // Only push the value when it genuinely differs to avoid spurious undo entries
-      if (model.getValue() !== code) {
-        model.pushEditOperations(
-          [],
-          [{ range: model.getFullModelRange(), text: code }],
-          () => null,
-        );
-        // Reset undo history so Ctrl+Z doesn't go back to previous experiment's code
-        model.pushStackElement();
+      lastSyncedExpId.current = experimentId;
+      model.setValue(code);
+      model.pushStackElement(); // Clean undo stack for new experiment
+    } else if (currentModelVal !== code) {
+      // Store code was updated externally (e.g. draft loaded or reset)
+      const currentPos = ed.getPosition();
+      model.pushEditOperations(
+        [],
+        [{ range: model.getFullModelRange(), text: code }],
+        () => null,
+      );
+      if (currentPos) {
+        ed.setPosition(currentPos);
       }
     }
-
-    syncedExpId.current = experimentId;
   }, [experimentId, code]);
 
   // ── Error marker management ────────────────────────────────────────────────
-  // Clear markers when experiment changes OR when there is no active error.
   const clearMarkers = useCallback(() => {
     const ed = editorRef.current;
     const monaco = monacoRef.current;
@@ -164,7 +184,7 @@ export const MonacoCodeEditor: React.FC<MonacoCodeEditorProps> = ({ theme, onCur
         </div>
       </div>
 
-      {/* Editor component — keepCurrentModel prevents unmount/remount on prop changes */}
+      {/* Editor component */}
       <div className="flex-1 w-full h-full relative">
         <Editor
           height="100%"
@@ -182,11 +202,16 @@ export const MonacoCodeEditor: React.FC<MonacoCodeEditorProps> = ({ theme, onCur
             insertSpaces: true,
             renderWhitespace: "selection",
             fontSize: 13,
+            lineHeight: 20,
             lineNumbers: "on",
-            fontFamily: "var(--font-mono)",
-            glyphMargin: true, // Enable for error glyph decoration
+            fontFamily: MONACO_FONT_FAMILY,
+            fontLigatures: false,
+            glyphMargin: true,
             folding: true,
             wordWrap: "off",
+            cursorBlinking: "smooth",
+            cursorSmoothCaretAnimation: "on",
+            matchBrackets: "always",
             scrollbar: {
               verticalScrollbarSize: 8,
               horizontalScrollbarSize: 8,

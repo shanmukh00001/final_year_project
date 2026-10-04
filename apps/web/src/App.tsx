@@ -22,9 +22,25 @@ export function App() {
   const loadExperiment = useWorkspaceStore((s) => s.loadExperiment);
 
   useEffect(() => {
-    // Initialize Pyodide engine and default DSP-03 workspace
-    const exp = getExperimentById("DSP-03");
-    initWorkspace("DSP-03", exp?.starterCode);
+    // Restore active experiment from URL parameter or localStorage
+    let targetExpId = "DSP-03";
+    try {
+      if (typeof window !== "undefined") {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlExp = urlParams.get("exp");
+        const storedExp = localStorage.getItem("vlab_active_experiment");
+        if (urlExp && getExperimentById(urlExp)) {
+          targetExpId = urlExp;
+        } else if (storedExp && getExperimentById(storedExp)) {
+          targetExpId = storedExp;
+        }
+      }
+    } catch {
+      // Ignore
+    }
+
+    const exp = getExperimentById(targetExpId);
+    initWorkspace(targetExpId, exp?.starterCode);
   }, [initWorkspace]);
 
   const handleSelectExperiment = (id: string) => {
