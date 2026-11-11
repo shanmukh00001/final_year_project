@@ -23,7 +23,7 @@ export function App() {
 
   useEffect(() => {
     // Restore active experiment from URL parameter or localStorage
-    let targetExpId = "DSP-03";
+    let targetExpId = "NT-01";
     try {
       if (typeof window !== "undefined") {
         const urlParams = new URLSearchParams(window.location.search);

@@ -11,6 +11,7 @@ export default tseslint.config(
       "apps/web/public/pyodide/**",
       "apps/web/public/opencv/**",
       "tests/golden/**",
+      "archive/**",
       "node_modules/**",
     ],
   },

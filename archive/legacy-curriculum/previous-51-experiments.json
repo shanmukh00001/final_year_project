@@ -1,0 +1,1307 @@
+{
+  "archivedAt": "2026-11-11T17:52:03.346Z",
+  "count": 51,
+  "experiments": [
+    {
+      "id": "SS-01",
+      "title": "Elementary Signal Generation",
+      "course": "SS",
+      "level": "UG",
+      "objective": "Generate and analyze continuous and discrete elementary signals (step, ramp, impulse, exponentials, sinusoids).",
+      "theory": "Elementary signals like unit step $u(t)$, ramp $r(t) = t \\cdot u(t)$, and sinusoidal signals $x(t) = A \\cos(2\\pi f t + \\phi)$ form the basis for continuous and discrete-time system analysis.",
+      "starterCode": "# SS-01: Elementary Signal Generation\nimport numpy as np\nimport vlab\n\nf = vlab.param(\"f\", 5.0, 1.0, 50.0, 1.0, label=\"Frequency (Hz)\")\namp = vlab.param(\"amp\", 1.0, 0.1, 5.0, 0.1, label=\"Amplitude\")\n\nt = np.linspace(0, 1, 1000)\nsine_wave = amp * np.sin(2 * np.pi * f * t)\nstep_wave = (t >= 0.2).astype(float)\n\nvlab.plot(t, sine_wave, label=\"Sinusoid\", title=\"Elementary Sinusoidal Signal\")\nprint(f\"Generated {len(t)} samples at f = {f} Hz, amplitude = {amp}\")\n",
+      "parameters": [
+        {
+          "name": "f",
+          "kind": "slider",
+          "default": 5,
+          "min": 1,
+          "max": 50,
+          "step": 1,
+          "label": "Frequency (Hz)"
+        },
+        {
+          "name": "amp",
+          "kind": "slider",
+          "default": 1,
+          "min": 0.1,
+          "max": 5,
+          "step": 0.1,
+          "label": "Amplitude"
+        }
+      ],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Elementary Sinusoidal Signal"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 300,
+      "matlabNotes": "MATLAB sin() -> np.sin(); linspace() -> np.linspace()",
+      "enabled": true
+    },
+    {
+      "id": "SS-02",
+      "title": "Linear Convolution",
+      "course": "SS",
+      "level": "UG",
+      "objective": "Compute linear convolution of discrete signals and explore commutative and associative properties.",
+      "theory": "Linear convolution of $x[n]$ and $h[n]$ is defined as $y[n] = \\sum_{k=-\\infty}^{\\infty} x[k] h[n-k]$.",
+      "starterCode": "# SS-02: Linear Convolution\nimport numpy as np\nimport vlab\n\nn = np.arange(0, 20)\nx = (0.8 ** n) * (n >= 0)\nh = np.ones(5)\n\ny = np.convolve(x, h)\nny = np.arange(0, len(y))\n\nvlab.plot(ny, y, label=\"y[n] = x[n] * h[n]\", title=\"Discrete Linear Convolution\")\nprint(f\"Convolution output length: {len(y)}\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Discrete Linear Convolution"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 300,
+      "matlabNotes": "conv(x, h) -> np.convolve(x, h)",
+      "enabled": true
+    },
+    {
+      "id": "SS-03",
+      "title": "Fourier Series and Gibbs Phenomenon",
+      "course": "SS",
+      "level": "UG",
+      "objective": "Reconstruct periodic signals using Fourier series harmonic sums and observe the Gibbs phenomenon.",
+      "theory": "A periodic square wave is represented by $x(t) = \\frac{4}{\\pi} \\sum_{k=1,3,5,\\dots}^{N} \\frac{1}{k} \\sin(k \\omega_0 t)$.",
+      "starterCode": "# SS-03: Fourier Series & Gibbs Phenomenon\nimport numpy as np\nimport vlab\n\nN = vlab.param(\"N\", 7, 1, 35, 2, kind=\"number\", label=\"Harmonics Count\")\n\nt = np.linspace(-1, 1, 1000)\nf0 = 1.0\nw0 = 2 * np.pi * f0\nx_recon = np.zeros_like(t)\n\nfor k in range(1, int(N) + 1, 2):\n    x_recon += (4 / (np.pi * k)) * np.sin(k * w0 * t)\n\nvlab.plot(t, x_recon, label=f\"N={N} harmonics\", title=\"Fourier Series Square Wave Approximation\")\nprint(f\"Synthesized Fourier series up to harmonic {N}\")\n",
+      "parameters": [
+        {
+          "name": "N",
+          "kind": "number",
+          "default": 7,
+          "min": 1,
+          "max": 35,
+          "step": 2,
+          "label": "Harmonics Count"
+        }
+      ],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Fourier Series Square Wave Approximation"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 350,
+      "matlabNotes": "For-loops over numpy arrays -> vectorised numpy ops or list comprehensions",
+      "enabled": true
+    },
+    {
+      "id": "SS-04",
+      "title": "Fourier Transform Properties",
+      "course": "SS",
+      "level": "UG",
+      "objective": "Verify linearity, time-shifting, and frequency-scaling properties of the Continuous-Time Fourier Transform.",
+      "theory": "For $x(t) \\leftrightarrow X(j\\omega)$, time shifting states $x(t - t_0) \\leftrightarrow X(j\\omega) e^{-j\\omega t_0}$.",
+      "starterCode": "# SS-04: Fourier Transform Properties\nimport numpy as np\nimport vlab\n\nt = np.linspace(-5, 5, 2048)\ndt = t[1] - t[0]\nx = np.exp(-t**2) # Gaussian pulse\n\nfreqs = np.fft.fftfreq(len(t), dt)\nX = np.fft.fft(x) * dt\n\nvlab.plot(np.fft.fftshift(freqs), np.fft.fftshift(np.abs(X)), label=\"|X(f)|\", title=\"Continuous Fourier Transform Magnitude\")\nprint(\"Computed Fourier transform spectrum\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Continuous Fourier Transform Magnitude"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 400,
+      "matlabNotes": "fftshift(fft(x)) -> np.fft.fftshift(np.fft.fft(x))",
+      "enabled": true
+    },
+    {
+      "id": "SS-05",
+      "title": "Sampling Theorem and Aliasing",
+      "course": "SS",
+      "level": "UG",
+      "objective": "Demonstrate Nyquist-Shannon sampling theorem and the occurrence of aliasing when sampling below the Nyquist rate.",
+      "theory": "To avoid aliasing, the sampling frequency must satisfy $f_s > 2 f_{max}$.",
+      "starterCode": "# SS-05: Sampling Theorem & Aliasing\nimport numpy as np\nimport vlab\n\nfs = vlab.param(\"fs\", 20.0, 5.0, 100.0, 5.0, label=\"Sampling Rate fs (Hz)\")\nf_sig = 10.0 # 10 Hz signal, Nyquist rate is 20 Hz\n\nt_cont = np.linspace(0, 0.5, 1000)\nx_cont = np.sin(2 * np.pi * f_sig * t_cont)\n\nt_samp = np.arange(0, 0.5, 1.0 / fs)\nx_samp = np.sin(2 * np.pi * f_sig * t_samp)\n\nvlab.plot(t_samp, x_samp, label=f\"Sampled at {fs} Hz\", title=\"Signal Sampling & Aliasing Demonstration\")\nprint(f\"Sampling frequency: {fs} Hz (Nyquist: {2*f_sig} Hz)\")\n",
+      "parameters": [
+        {
+          "name": "fs",
+          "kind": "slider",
+          "default": 20,
+          "min": 5,
+          "max": 100,
+          "step": 5,
+          "label": "Sampling Rate fs (Hz)"
+        }
+      ],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Signal Sampling & Aliasing Demonstration"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 300,
+      "matlabNotes": "stem(t, x) -> vlab.plot(t, x)",
+      "enabled": true
+    },
+    {
+      "id": "SS-06",
+      "title": "Pole-Zero Plots and LTI Stability",
+      "course": "SS",
+      "level": "UG",
+      "objective": "Analyze pole-zero constellation and determine BIBO stability and frequency response of linear time-invariant systems.",
+      "theory": "A continuous LTI system is BIBO stable if all poles of its transfer function $H(s)$ have negative real parts.",
+      "starterCode": "# SS-06: Pole-Zero Plots and Stability\nimport numpy as np\nfrom scipy import signal\nimport vlab\n\nw, h = signal.freqs([1], [1, 2, 1], np.logspace(-1, 2, 200))\n\nvlab.plot(w, 20 * np.log10(np.abs(h)), label=\"|H(jw)| (dB)\", title=\"LTI System Frequency Response\")\nprint(\"Evaluated second-order continuous LTI frequency response\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "LTI System Frequency Response"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 400,
+      "matlabNotes": "freqs(num, den, w) -> scipy.signal.freqs(num, den, w)",
+      "enabled": true
+    },
+    {
+      "id": "SS-07",
+      "title": "Laplace and Z-Transform Analysis",
+      "course": "SS",
+      "level": "UG",
+      "objective": "Perform partial fraction expansion and compute impulse response of continuous and discrete systems.",
+      "theory": "Partial fraction expansion decomposes $H(s) = \\frac{B(s)}{A(s)} = \\sum \\frac{r_k}{s - p_k} + k(s)$.",
+      "starterCode": "# SS-07: Laplace and Z-Transform\nimport numpy as np\nfrom scipy import signal\nimport vlab\n\nb = [1, 3]\na = [1, 3, 2]\nr, p, k = signal.residue(b, a)\n\nt = np.linspace(0, 5, 200)\nt, y = signal.impulse((b, a), T=t)\n\nvlab.plot(t, y, label=\"Impulse Response h(t)\", title=\"Laplace Inverse Transform Response\")\nprint(f\"Residues: {r}, Poles: {p}\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Laplace Inverse Transform Response"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 350,
+      "matlabNotes": "residue(b, a) -> scipy.signal.residue(b, a)",
+      "enabled": true
+    },
+    {
+      "id": "NT-01",
+      "title": "Thevenin and Norton Equivalents",
+      "course": "NT",
+      "level": "UG",
+      "objective": "Determine Thevenin voltage, Norton current, and equivalent resistance of linear DC circuits.",
+      "theory": "Thevenin's theorem reduces any linear two-terminal circuit to an independent voltage source $V_{th}$ in series with $R_{th}$.",
+      "starterCode": "# NT-01: Thevenin and Norton Equivalents\nimport numpy as np\nimport vlab\n\nr_load = np.linspace(10, 500, 100)\nv_th = 12.0\nr_th = 50.0\n\ni_load = v_th / (r_th + r_load)\nv_load = i_load * r_load\n\nvlab.plot(r_load, v_load, label=\"V_load vs R_load\", title=\"Thevenin Circuit Load Line\")\nprint(f\"V_th: {v_th} V, R_th: {r_th} Ohms, I_norton: {v_th/r_th} A\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Thevenin Circuit Load Line"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 300,
+      "matlabNotes": "Matrix solve A \\ b -> np.linalg.solve(A, b)",
+      "enabled": true
+    },
+    {
+      "id": "NT-02",
+      "title": "Maximum Power Transfer Theorem",
+      "course": "NT",
+      "level": "UG",
+      "objective": "Verify that maximum power is delivered to the load when load resistance equals source Thevenin resistance.",
+      "theory": "Power transferred $P_L = I_L^2 R_L = \\frac{V_{th}^2 R_L}{(R_{th} + R_L)^2}$, maximizing at $R_L = R_{th}$.",
+      "starterCode": "# NT-02: Maximum Power Transfer\nimport numpy as np\nimport vlab\n\nr_th = vlab.param(\"r_th\", 50.0, 10.0, 200.0, 10.0, label=\"Thevenin R_th (Ohms)\")\nv_th = 10.0\n\nr_load = np.linspace(1, 200, 300)\np_load = (v_th ** 2 * r_load) / ((r_th + r_load) ** 2)\n\nvlab.plot(r_load, p_load, label=\"Power (W)\", title=\"Maximum Power Transfer Curve\")\nprint(f\"Max power occurs at R_load = {r_th} Ohms with P_max = {(v_th**2)/(4*r_th):.4f} W\")\n",
+      "parameters": [
+        {
+          "name": "r_th",
+          "kind": "slider",
+          "default": 50,
+          "min": 10,
+          "max": 200,
+          "step": 10,
+          "label": "Thevenin R_th (Ohms)"
+        }
+      ],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Maximum Power Transfer Curve"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 300,
+      "matlabNotes": "Element-wise multiplication .* -> * in numpy",
+      "enabled": true
+    },
+    {
+      "id": "NT-03",
+      "title": "RLC Transient Response",
+      "course": "NT",
+      "level": "UG",
+      "objective": "Analyze overdamped, critically damped, and underdamped transient responses of series RLC circuits.",
+      "theory": "The characteristic equation $s^2 + \\frac{R}{L}s + \\frac{1}{LC} = 0$ governs transient damping.",
+      "starterCode": "# NT-03: RLC Transient Response\nimport numpy as np\nfrom scipy import signal\nimport vlab\n\nR = vlab.param(\"R\", 20.0, 1.0, 100.0, 5.0, label=\"Resistance R (Ohms)\")\nL = 0.1 # 100 mH\nC = 100e-6 # 100 uF\n\nnum = [1 / (L * C)]\nden = [1, R / L, 1 / (L * C)]\nsys = signal.TransferFunction(num, den)\n\nt = np.linspace(0, 0.05, 500)\nt, y = signal.step(sys, T=t)\n\nvlab.plot(t, y, label=f\"R={R} Ohms\", title=\"Series RLC Step Response\")\nprint(f\"Damping ratio zeta: {R / (2 * np.sqrt(L / C)):.3f}\")\n",
+      "parameters": [
+        {
+          "name": "R",
+          "kind": "slider",
+          "default": 20,
+          "min": 1,
+          "max": 100,
+          "step": 5,
+          "label": "Resistance R (Ohms)"
+        }
+      ],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Series RLC Step Response"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 350,
+      "matlabNotes": "step(sys) -> scipy.signal.step(sys)",
+      "enabled": true
+    },
+    {
+      "id": "NT-04",
+      "title": "AC Steady State and Phasors",
+      "course": "NT",
+      "level": "UG",
+      "objective": "Compute sinusoidal steady-state voltages and currents using complex impedance and phasor analysis.",
+      "theory": "Inductive impedance $Z_L = j\\omega L$ and capacitive impedance $Z_C = \\frac{1}{j\\omega C}$.",
+      "starterCode": "# NT-04: AC Steady State & Phasors\nimport numpy as np\nimport vlab\n\nf = 50.0 # 50 Hz\nw = 2 * np.pi * f\nR = 100.0\nL = 0.5\nC = 20e-6\n\nZ_total = R + 1j * (w * L - 1 / (w * C))\nV_source = 230.0 + 0j\nI_circuit = V_source / Z_total\n\nt = np.linspace(0, 0.04, 500)\nv_t = np.abs(V_source) * np.cos(w * t + np.angle(V_source))\ni_t = np.abs(I_circuit) * np.cos(w * t + np.angle(I_circuit))\n\nvlab.plot(t, v_t, label=\"v(t) Volts\", title=\"AC Steady-State Voltage Waveform\")\nprint(f\"Impedance: {Z_total:.2f} Ohms, Current Mag: {np.abs(I_circuit):.2f} A, Phase: {np.angle(I_circuit, deg=True):.1f} deg\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "AC Steady-State Voltage Waveform"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 300,
+      "matlabNotes": "1i in MATLAB -> 1j in Python",
+      "enabled": true
+    },
+    {
+      "id": "NT-05",
+      "title": "Series and Parallel Resonance",
+      "course": "NT",
+      "level": "UG",
+      "objective": "Determine resonant frequency, quality factor Q, and half-power bandwidth of resonant circuits.",
+      "theory": "Resonant frequency $\\omega_0 = \\frac{1}{\\sqrt{LC}}$, and Quality Factor $Q = \\frac{\\omega_0 L}{R}$.",
+      "starterCode": "# NT-05: Series Resonance\nimport numpy as np\nimport vlab\n\nL = 10e-3 # 10 mH\nC = 100e-9 # 100 nF\nR = vlab.param(\"R\", 10.0, 2.0, 50.0, 2.0, label=\"Resistance R\")\n\nf0 = 1 / (2 * np.pi * np.sqrt(L * C))\nfreqs = np.linspace(f0 * 0.5, f0 * 1.5, 500)\nw = 2 * np.pi * freqs\n\nZ = R + 1j * (w * L - 1 / (w * C))\nI_mag = 10.0 / np.abs(Z)\n\nvlab.plot(freqs, I_mag, label=f\"R={R} Ohms\", title=\"Series RLC Resonance Frequency Response\")\nprint(f\"Resonant frequency f0 = {f0:.1f} Hz, Q = {(2*np.pi*f0*L)/R:.2f}\")\n",
+      "parameters": [
+        {
+          "name": "R",
+          "kind": "slider",
+          "default": 10,
+          "min": 2,
+          "max": 50,
+          "step": 2,
+          "label": "Resistance R"
+        }
+      ],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Series RLC Resonance Frequency Response"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 350,
+      "matlabNotes": "logspace() -> np.logspace()",
+      "enabled": true
+    },
+    {
+      "id": "NT-06",
+      "title": "Two-Port Network Parameters",
+      "course": "NT",
+      "level": "UG",
+      "objective": "Calculate and convert between Impedance (Z), Admittance (Y), Transmission (ABCD), and Hybrid (h) parameters.",
+      "theory": "Two-port parameters relate port voltages and currents: $[V] = [Z][I]$ and $[I] = [Y][V]$.",
+      "starterCode": "# NT-06: Two-Port Parameters\nimport numpy as np\nimport vlab\n\n# T-network with Z1=10, Z2=20, Z3=30\nZ1, Z2, Z3 = 10.0, 20.0, 30.0\n\nZ11 = Z1 + Z3\nZ12 = Z3\nZ21 = Z3\nZ22 = Z2 + Z3\nZ_matrix = np.array([[Z11, Z12], [Z21, Z22]])\nY_matrix = np.linalg.inv(Z_matrix)\n\nvlab.plot(np.arange(4), Z_matrix.flatten(), label=\"Z Matrix Elements\", title=\"Two-Port Z-Parameters\")\nprint(f\"Z-matrix:\n{Z_matrix}\nY-matrix:\n{Y_matrix}\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Two-Port Z-Parameters"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 300,
+      "matlabNotes": "inv(Z) -> np.linalg.inv(Z)",
+      "enabled": true
+    },
+    {
+      "id": "NT-07",
+      "title": "Passive Filter Frequency Response",
+      "course": "NT",
+      "level": "UG",
+      "objective": "Design passive low-pass, high-pass, and band-pass filters and plot Bode magnitude and phase curves.",
+      "theory": "For a first-order RC low-pass filter, the cutoff frequency is $f_c = \\frac{1}{2\\pi RC}$.",
+      "starterCode": "# NT-07: Passive RC Filter Bode Plot\nimport numpy as np\nfrom scipy import signal\nimport vlab\n\nR = 1e3 # 1 kOhm\nC = 100e-9 # 100 nF\nfc = 1 / (2 * np.pi * R * C)\n\nsys = signal.TransferFunction([1], [R * C, 1])\nw, mag, phase = signal.bode(sys, w=np.logspace(1, 6, 200))\n\nvlab.plot(w / (2 * np.pi), mag, label=\"Magnitude (dB)\", title=\"Passive Low-Pass Filter Bode Plot\")\nprint(f\"Cutoff frequency fc = {fc:.1f} Hz, Magnitude at fc = -3.01 dB\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Passive Low-Pass Filter Bode Plot"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 350,
+      "matlabNotes": "bode(sys) -> scipy.signal.bode(sys)",
+      "enabled": true
+    },
+    {
+      "id": "DSP-01",
+      "title": "DFT, FFT, and Spectral Leakage",
+      "course": "DSP",
+      "level": "UG",
+      "objective": "Analyze DFT frequency resolution, window functions (Rectangular, Hamming, Hanning), and zero padding.",
+      "theory": "The N-point Discrete Fourier Transform converts time series $x[n]$ to discrete spectrum $X[k] = \\sum_{n=0}^{N-1} x[n] e^{-j 2\\pi k n / N}$.",
+      "starterCode": "# DSP-01: DFT, FFT & Spectral Leakage\nimport numpy as np\nimport vlab\n\nN = 64\nn = np.arange(N)\nf_bin = 5.5 # Non-integer bin causing leakage\nx = np.cos(2 * np.pi * f_bin * n / N)\n\nw_rect = x\nw_hamm = x * np.hamming(N)\n\nX_rect = np.abs(np.fft.fft(w_rect, 512))\nX_hamm = np.abs(np.fft.fft(w_hamm, 512))\n\nvlab.plot(np.linspace(0, 1, len(X_rect)), 20 * np.log10(X_rect + 1e-12), label=\"Rectangular Window\", title=\"Spectral Leakage & Windowing\")\nprint(f\"Computed 512-point zero-padded FFT with Rectangular and Hamming windows\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Spectral Leakage & Windowing"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 350,
+      "matlabNotes": "fft(x, N) -> np.fft.fft(x, N); hamming(N) -> np.hamming(N)",
+      "enabled": true
+    },
+    {
+      "id": "DSP-02",
+      "title": "Linear and Circular Convolution",
+      "course": "DSP",
+      "level": "UG",
+      "objective": "Implement linear convolution via circular convolution with appropriate zero-padding and overlap-add methods.",
+      "theory": "Linear convolution of length $L$ and $M$ equals circular convolution when padded to length $N \\ge L + M - 1$.",
+      "starterCode": "# DSP-02: Linear vs Circular Convolution\nimport numpy as np\nimport vlab\n\nx = np.array([1, 2, 3, 4, 5])\nh = np.array([1, -1, 2])\n\n# Linear convolution\ny_lin = np.convolve(x, h)\n\n# Circular convolution via FFT\nN = len(x) + len(h) - 1\nX = np.fft.fft(x, N)\nH = np.fft.fft(h, N)\ny_circ = np.real(np.fft.ifft(X * H))\n\ndiff = np.max(np.abs(y_lin - y_circ))\nvlab.plot(np.arange(len(y_lin)), y_lin, label=\"Linear Convolution Output\", title=\"Convolution Equivalence\")\nprint(f\"Max absolute difference between linear & FFT convolution: {diff:.2e}\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Convolution Equivalence"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 300,
+      "matlabNotes": "ifft(X .* H) -> np.fft.ifft(X * H)",
+      "enabled": true
+    },
+    {
+      "id": "DSP-03",
+      "title": "FIR Filter Design",
+      "course": "DSP",
+      "level": "UG",
+      "objective": "Design linear-phase FIR filters using window method and Parks-McClellan (Remez) algorithm.",
+      "theory": "FIR filters offer exact linear phase and guaranteed stability due to having only zeros.",
+      "starterCode": "# DSP-03: FIR Filter Design\nimport numpy as np\nfrom scipy import signal\nimport vlab\n\nfc = vlab.param(\"fc\", 0.3, 0.01, 0.99, 0.01, label=\"Cutoff Frequency (normalized)\")\nnumtaps = vlab.param(\"numtaps\", 51, 3, 1001, 2, kind=\"number\", label=\"Filter Taps\")\n\nh = signal.firwin(int(numtaps), float(fc), window=\"hamming\")\nw, H = signal.freqz(h, worN=512)\n\nvlab.plot(w / np.pi, 20 * np.log10(np.abs(H) + 1e-12), label=\"Magnitude Response (dB)\", title=\"FIR Filter Frequency Response\")\nprint(f\"Designed FIR filter with {numtaps} taps and cutoff {fc}\")\n",
+      "parameters": [
+        {
+          "name": "fc",
+          "kind": "slider",
+          "default": 0.3,
+          "min": 0.05,
+          "max": 0.95,
+          "step": 0.05,
+          "label": "Cutoff Frequency (normalized)"
+        },
+        {
+          "name": "numtaps",
+          "kind": "number",
+          "default": 51,
+          "min": 11,
+          "max": 101,
+          "step": 2,
+          "label": "Filter Taps"
+        }
+      ],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "FIR Filter Frequency Response"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 350,
+      "matlabNotes": "fir1(N, Wn) -> scipy.signal.firwin(N+1, Wn)",
+      "enabled": true
+    },
+    {
+      "id": "DSP-04",
+      "title": "IIR Filter Design",
+      "course": "DSP",
+      "level": "UG",
+      "objective": "Design digital IIR filters using Bilinear Transformation (Butterworth, Chebyshev, and Elliptic).",
+      "theory": "IIR filters achieve sharp cutoff transitions with significantly fewer coefficients than FIR filters.",
+      "starterCode": "# DSP-04: IIR Butterworth Filter Design\nimport numpy as np\nfrom scipy import signal\nimport vlab\n\norder = vlab.param(\"order\", 4, 1, 8, 1, kind=\"number\", label=\"Filter Order\")\nWn = 0.2\n\nb, a = signal.butter(int(order), Wn, btype=\"low\")\nw, h = signal.freqz(b, a, worN=512)\n\nvlab.plot(w / np.pi, 20 * np.log10(np.abs(h) + 1e-12), label=f\"Order {order} Butterworth\", title=\"IIR Low-Pass Response\")\nprint(f\"Butterworth Order {order} coefficients:\nb = {b}\na = {a}\")\n",
+      "parameters": [
+        {
+          "name": "order",
+          "kind": "slider",
+          "default": 4,
+          "min": 1,
+          "max": 8,
+          "step": 1,
+          "label": "Filter Order"
+        }
+      ],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "IIR Low-Pass Response"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 350,
+      "matlabNotes": "butter(N, Wn) -> scipy.signal.butter(N, Wn)",
+      "enabled": true
+    },
+    {
+      "id": "DSP-05",
+      "title": "Short-Time Fourier Transform (STFT)",
+      "course": "DSP",
+      "level": "UG",
+      "objective": "Compute and visualize time-frequency spectrograms of non-stationary signals and chirp waveforms.",
+      "theory": "STFT segments signal with sliding window: $X(m, \\omega) = \\sum_n x[n] w[n-m] e^{-j\\omega n}$.",
+      "starterCode": "# DSP-05: STFT and Spectrogram\nimport numpy as np\nfrom scipy import signal\nimport vlab\n\nfs = 1000\nt = np.linspace(0, 2, 2 * fs)\n# Linear chirp from 20 Hz to 200 Hz\nx = signal.chirp(t, f0=20, t1=2, f1=200, method=\"linear\")\n\nf, t_spec, Zxx = signal.stft(x, fs, nperseg=128)\n\nvlab.plot(t, x, label=\"Chirp Waveform\", title=\"Time-Varying Linear Chirp Signal\")\nprint(f\"STFT computed: {Zxx.shape[0]} frequency bins, {Zxx.shape[1]} time segments\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Time-Varying Linear Chirp Signal"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 400,
+      "matlabNotes": "spectrogram(x) -> scipy.signal.stft(x, fs)",
+      "enabled": true
+    },
+    {
+      "id": "DSP-06",
+      "title": "Multirate Signal Processing",
+      "course": "DSP",
+      "level": "UG",
+      "objective": "Implement decimation (downsampling with anti-aliasing) and interpolation (upsampling with anti-imaging).",
+      "theory": "Decimation reduces sampling rate by factor $M$ requiring anti-aliasing lowpass filter with cutoff $\\pi / M$.",
+      "starterCode": "# DSP-06: Decimation and Interpolation\nimport numpy as np\nfrom scipy import signal\nimport vlab\n\nfs = 1000\nt = np.linspace(0, 0.1, 100)\nx = np.sin(2 * np.pi * 50 * t) + np.sin(2 * np.pi * 300 * t)\n\n# Decimate by factor 4\ny_dec = signal.decimate(x, 4)\n\nvlab.plot(np.arange(len(y_dec)), y_dec, label=\"Decimated (M=4)\", title=\"Multirate Decimation Output\")\nprint(f\"Original length: {len(x)}, Decimated length: {len(y_dec)}\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Multirate Decimation Output"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 350,
+      "matlabNotes": "decimate(x, r) -> scipy.signal.decimate(x, r)",
+      "enabled": true
+    },
+    {
+      "id": "DSP-07",
+      "title": "Audio Filtering and Equalization",
+      "course": "DSP",
+      "level": "UG",
+      "objective": "Filter audio signals using bandpass and notch filters to remove noise and unwanted tones.",
+      "theory": "Notch filters eliminate a specific interfering harmonic frequency without altering surrounding spectrum.",
+      "starterCode": "# DSP-07: Audio Tone Filtering\nimport numpy as np\nfrom scipy import signal\nimport vlab\n\nfs = 8000\nt = np.linspace(0, 0.5, 4000)\nvoice = np.sin(2 * np.pi * 300 * t)\nhum_50hz = 0.5 * np.sin(2 * np.pi * 50 * t)\naudio_noisy = voice + hum_50hz\n\n# Notch filter at 50 Hz\nb_notch, a_notch = signal.iirnotch(50, Q=30, fs=fs)\nfiltered_audio = signal.filtfilt(b_notch, a_notch, audio_noisy)\n\nvlab.plot(t[:200], filtered_audio[:200], label=\"Filtered Signal\", title=\"50 Hz Notch Filtering\")\nprint(f\"Signal processed with 50 Hz Notch filter (Q=30)\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "50 Hz Notch Filtering"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 400,
+      "matlabNotes": "iirnotch(w0, bw) -> scipy.signal.iirnotch(w0, Q, fs=fs)",
+      "enabled": true
+    },
+    {
+      "id": "DIP-01",
+      "title": "Image Point Operations and Gamma Correction",
+      "course": "DIP",
+      "level": "UG",
+      "objective": "Implement negative transformation, logarithmic scaling, and power-law (gamma) intensity modifications.",
+      "theory": "Power-law transformation is given by $s = c \\cdot r^\\gamma$, used for monitor brightness calibration.",
+      "starterCode": "# DIP-01: Image Point Operations\nimport numpy as np\nimport vlab\n\ngamma = vlab.param(\"gamma\", 1.5, 0.2, 3.0, 0.1, label=\"Gamma Value\")\n\n# Create synthetic 2D gradient test pattern\nx = np.linspace(0, 1, 100)\nimg = np.outer(x, x)\n\n# Apply gamma correction\nimg_gamma = img ** float(gamma)\n\nvlab.plot(x, img_gamma[50, :], label=f\"Gamma = {gamma}\", title=\"Intensity Transformation Profile\")\nprint(f\"Computed gamma correction with gamma = {gamma}\")\n",
+      "parameters": [
+        {
+          "name": "gamma",
+          "kind": "slider",
+          "default": 1.5,
+          "min": 0.2,
+          "max": 3,
+          "step": 0.1,
+          "label": "Gamma Value"
+        }
+      ],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Intensity Transformation Profile"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 300,
+      "matlabNotes": "imadjust() -> img ** gamma",
+      "enabled": true
+    },
+    {
+      "id": "DIP-02",
+      "title": "Histogram Equalization and Contrast Enhancement",
+      "course": "DIP",
+      "level": "UG",
+      "objective": "Compute image histograms and apply cumulative distribution function (CDF) equalization to improve contrast.",
+      "theory": "Histogram equalization flattens the probability density function (PDF) using $s_k = T(r_k) = \\sum_{j=0}^k p_r(r_j)$.",
+      "starterCode": "# DIP-02: Histogram Equalization\nimport numpy as np\nimport vlab\n\n# Synthetic low-contrast image matrix\nimg = np.clip(np.random.normal(120, 20, (128, 128)), 0, 255).astype(np.uint8)\n\nhist, bins = np.histogram(img.flatten(), 256, [0, 256])\ncdf = hist.cumsum()\ncdf_normalized = (cdf - cdf.min()) * 255 / (cdf.max() - cdf.min())\nimg_eq = cdf_normalized[img].astype(np.uint8)\n\nvlab.plot(np.arange(256), hist, label=\"Original Histogram\", title=\"Image Histogram Distribution\")\nprint(f\"Histogram Equalization complete. Original dynamic range: [{img.min()}, {img.max()}] -> [{img_eq.min()}, {img_eq.max()}]\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Image Histogram Distribution"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 350,
+      "matlabNotes": "histeq(I) -> cdf mapping",
+      "enabled": true
+    },
+    {
+      "id": "DIP-03",
+      "title": "Spatial Filtering and Noise Reduction",
+      "course": "DIP",
+      "level": "UG",
+      "objective": "Apply averaging, Gaussian smoothing, median, and Laplacian sharpening spatial convolution filters.",
+      "theory": "Linear spatial filtering computes output pixel as $g(x,y) = \\sum_{s} \\sum_{t} w(s,t) f(x+s, y+t)$.",
+      "starterCode": "# DIP-03: Spatial Filtering\nimport numpy as np\nfrom scipy import signal\nimport vlab\n\n# 2D Gaussian smoothing kernel (5x5)\nax = np.linspace(-2, 2, 5)\nxx, yy = np.meshgrid(ax, ax)\nkernel = np.exp(-(xx**2 + yy**2) / (2 * 1.0**2))\nkernel = kernel / np.sum(kernel)\n\nvlab.plot(ax, kernel[2, :], label=\"Gaussian Slice\", title=\"Gaussian Filter Profile\")\nprint(f\"Gaussian 5x5 Kernel:\n{np.round(kernel, 4)}\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Gaussian Filter Profile"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 300,
+      "matlabNotes": "fspecial('gaussian') -> custom meshgrid formulation",
+      "enabled": true
+    },
+    {
+      "id": "DIP-04",
+      "title": "2D Discrete Fourier Transform & Frequency Filtering",
+      "course": "DIP",
+      "level": "UG",
+      "objective": "Perform 2D FFT on image arrays and analyze ideal and Butterworth low-pass and high-pass filters.",
+      "theory": "2D DFT $F(u,v) = \\sum_x \\sum_y f(x,y) e^{-j 2\\pi (ux/M + vy/N)}$ reveals directional spatial frequencies.",
+      "starterCode": "# DIP-04: 2D DFT & Frequency Filtering\nimport numpy as np\nimport vlab\n\nN = 128\nimg = np.zeros((N, N))\nimg[48:80, 48:80] = 1.0 # Centered square\n\nF = np.fft.fftshift(np.fft.fft2(img))\nmag = np.log1p(np.abs(F))\n\nvlab.plot(np.arange(N), mag[64, :], label=\"Center Spectrum Slice\", title=\"2D Spectrum Log-Magnitude\")\nprint(f\"2D DFT calculated on {N}x{N} matrix\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "2D Spectrum Log-Magnitude"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 350,
+      "matlabNotes": "fft2(I) -> np.fft.fft2(img)",
+      "enabled": true
+    },
+    {
+      "id": "DIP-05",
+      "title": "Edge Detection Operators",
+      "course": "DIP",
+      "level": "UG",
+      "objective": "Implement Sobel, Prewitt, and Laplacian edge detectors and analyze gradient magnitude and direction.",
+      "theory": "The Sobel gradient magnitude $M(x,y) = \\sqrt{G_x^2 + G_y^2}$ detects abrupt intensity discontinuities.",
+      "starterCode": "# DIP-05: Sobel Edge Detection\nimport numpy as np\nfrom scipy import signal\nimport vlab\n\nimg = np.zeros((64, 64))\nimg[20:44, 20:44] = 255.0\n\nGx_kernel = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])\nGy_kernel = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]])\n\nGx = signal.convolve2d(img, Gx_kernel, mode=\"same\")\nGy = signal.convolve2d(img, Gy_kernel, mode=\"same\")\nmag = np.sqrt(Gx**2 + Gy**2)\n\nvlab.plot(np.arange(64), mag[32, :], label=\"Sobel Gradient Slice\", title=\"Edge Detection Profile\")\nprint(f\"Detected edge magnitude max: {mag.max():.1f}\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Edge Detection Profile"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 350,
+      "matlabNotes": "edge(I, 'sobel') -> scipy.signal.convolve2d",
+      "enabled": true
+    },
+    {
+      "id": "DIP-06",
+      "title": "Morphological Image Processing",
+      "course": "DIP",
+      "level": "UG",
+      "objective": "Execute fundamental morphological operations: erosion, dilation, opening, and closing with structuring elements.",
+      "theory": "Erosion $A \\ominus B = \\{z \\mid (B)_z \\subseteq A\\}$ shrinks foreground objects; Dilation expands them.",
+      "starterCode": "# DIP-06: Morphological Processing\nimport numpy as np\nfrom scipy import ndimage\nimport vlab\n\nbinary_img = np.zeros((50, 50), dtype=bool)\nbinary_img[15:35, 15:35] = True\nstruct_elem = ndimage.generate_binary_structure(2, 1)\n\neroded = ndimage.binary_erosion(binary_img, structure=struct_elem)\ndilated = ndimage.binary_dilation(binary_img, structure=struct_elem)\n\nvlab.plot(np.arange(50), dilated[25, :].astype(float), label=\"Dilated Boundary\", title=\"Morphological Profile\")\nprint(f\"Original pixels: {binary_img.sum()}, Eroded: {eroded.sum()}, Dilated: {dilated.sum()}\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Morphological Profile"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 300,
+      "matlabNotes": "imerode(I, se) -> scipy.ndimage.binary_erosion",
+      "enabled": true
+    },
+    {
+      "id": "DIP-07",
+      "title": "Image Segmentation and Thresholding",
+      "course": "DIP",
+      "level": "UG",
+      "objective": "Segment grayscale images into object and background regions using Otsu global optimal thresholding.",
+      "theory": "Otsu's method maximizes between-class variance $\\sigma_B^2 = \\omega_0 \\omega_1 (\\mu_0 - \\mu_1)^2$.",
+      "starterCode": "# DIP-07: Otsu Thresholding\nimport numpy as np\nimport vlab\n\n# Bimodal synthetic histogram\nnp.random.seed(42)\nimg = np.concatenate([np.random.normal(60, 15, 5000), np.random.normal(180, 20, 5000)])\nimg = np.clip(img, 0, 255).astype(np.uint8)\n\nhist, bins = np.histogram(img, 256, [0, 256])\nhist = hist.astype(float) / hist.sum()\n\nvariances = []\nfor t in range(1, 255):\n    w0 = np.sum(hist[:t])\n    w1 = np.sum(hist[t:])\n    if w0 == 0 or w1 == 0:\n        variances.append(0)\n        continue\n    u0 = np.sum(np.arange(t) * hist[:t]) / w0\n    u1 = np.sum(np.arange(t, 256) * hist[t:]) / w1\n    variances.append(w0 * w1 * ((u0 - u1) ** 2))\n\noptimal_t = np.argmax(variances) + 1\nvlab.plot(np.arange(1, 255), variances, label=\"Between-Class Variance\", title=\"Otsu Variance Optimization\")\nprint(f\"Optimal Otsu Threshold computed: {optimal_t}\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Otsu Variance Optimization"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 350,
+      "matlabNotes": "graythresh(I) -> Otsu variance maximization",
+      "enabled": true
+    },
+    {
+      "id": "BEE-01",
+      "title": "PN-Junction Diode I-V Characteristics",
+      "course": "BEE",
+      "level": "UG",
+      "objective": "Simulate forward and reverse bias I-V characteristics of a PN junction diode using the Shockley equation.",
+      "theory": "Shockley equation: $I = I_s (e^{V_D / (\\eta V_T)} - 1)$, where $V_T \\approx 26\\text{ mV}$ at room temperature.",
+      "starterCode": "# BEE-01: PN Diode Characteristics\nimport numpy as np\nimport vlab\n\nIs = 1e-12 # 1 pA saturation current\nVt = 0.026 # 26 mV thermal voltage\neta = 1.0\n\nv_d = np.linspace(0, 0.8, 200)\ni_d = Is * (np.exp(v_d / (eta * Vt)) - 1)\n\nvlab.plot(v_d, i_d * 1e3, label=\"Diode Current (mA)\", title=\"Forward PN Diode I-V Curve\")\nprint(f\"Current at Vd=0.7V: {Is * (np.exp(0.7 / (eta * Vt)) - 1) * 1e3:.2f} mA\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Forward PN Diode I-V Curve"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 300,
+      "matlabNotes": "exp() -> np.exp()",
+      "enabled": true
+    },
+    {
+      "id": "BEE-02",
+      "title": "Rectifiers and Filter Ripple Factor",
+      "course": "BEE",
+      "level": "UG",
+      "objective": "Analyze half-wave and full-wave bridge rectifier waveforms and calculate ripple factor with filter capacitors.",
+      "theory": "Ripple factor $\\gamma = \\frac{V_{ac,rms}}{V_{dc}} = \\frac{1}{2\\sqrt{3} f R_L C}$ for full-wave rectifiers.",
+      "starterCode": "# BEE-02: Full-Wave Rectifier\nimport numpy as np\nimport vlab\n\nt = np.linspace(0, 0.04, 1000)\nv_in = 12.0 * np.sin(2 * np.pi * 50 * t)\nv_rect = np.abs(v_in)\n\nvlab.plot(t, v_rect, label=\"|Vin|\", title=\"Full-Wave Rectified Output\")\nprint(f\"DC voltage of full-wave rectified signal: {2 * 12.0 / np.pi:.2f} V\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Full-Wave Rectified Output"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 300,
+      "matlabNotes": "abs(sin()) -> np.abs(np.sin())",
+      "enabled": true
+    },
+    {
+      "id": "BEE-03",
+      "title": "Zener Diode Voltage Regulator",
+      "course": "BEE",
+      "level": "UG",
+      "objective": "Evaluate line and load regulation of a Zener diode voltage regulator circuit.",
+      "theory": "In breakdown, the Zener diode maintains an almost constant voltage $V_Z$ across varying supply voltages and load currents.",
+      "starterCode": "# BEE-03: Zener Voltage Regulator\nimport numpy as np\nimport vlab\n\nVz = 5.1 # 5.1V Zener\nR_series = 220.0\nv_in = np.linspace(0, 15, 100)\n\nv_out = np.where(v_in > Vz, Vz, v_in)\n\nvlab.plot(v_in, v_out, label=\"V_out vs V_in\", title=\"Zener Line Regulation Curve\")\nprint(f\"Regulated voltage clamped at {Vz} V\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Zener Line Regulation Curve"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 300,
+      "matlabNotes": "where() -> np.where()",
+      "enabled": true
+    },
+    {
+      "id": "BEE-04",
+      "title": "BJT Characteristics and Q-Point",
+      "course": "BEE",
+      "level": "UG",
+      "objective": "Plot common-emitter output characteristics ($I_C$ vs $V_{CE}$) and locate the DC operating Q-point.",
+      "theory": "$I_C = \\beta I_B$ in the active region; DC load line equation is $V_{CE} = V_{CC} - I_C R_C$.",
+      "starterCode": "# BEE-04: BJT Common-Emitter Characteristics\nimport numpy as np\nimport vlab\n\nbeta = 100.0\nVce = np.linspace(0, 10, 200)\n\n# Families of curves for Ib = 10uA, 20uA, 30uA, 40uA\nIb_list = [10e-6, 20e-6, 30e-6, 40e-6]\nIc_curves = []\n\nfor Ib in Ib_list:\n    Ic = beta * Ib * (1 - np.exp(-Vce / 0.3))\n    Ic_curves.append(Ic * 1e3)\n\nvlab.plot(Vce, Ic_curves[-1], label=\"Ib = 40 uA\", title=\"BJT Output Characteristics\")\nprint(f\"Computed BJT curves for beta={beta}\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "BJT Output Characteristics"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 350,
+      "matlabNotes": "For-loop plotting -> multiple series in vlab",
+      "enabled": true
+    },
+    {
+      "id": "BEE-05",
+      "title": "Operational Amplifier (Op-Amp) Configurations",
+      "course": "BEE",
+      "level": "UG",
+      "objective": "Simulate inverting, non-inverting, integrator, and differentiator op-amp circuits.",
+      "theory": "Ideal inverting amplifier closed-loop gain $A_v = -\\frac{R_f}{R_1}$; non-inverting gain $A_v = 1 + \\frac{R_f}{R_1}$.",
+      "starterCode": "# BEE-05: Inverting Op-Amp\nimport numpy as np\nimport vlab\n\nRf = vlab.param(\"Rf\", 10.0, 1.0, 50.0, 1.0, label=\"Feedback Rf (kOhms)\")\nR1 = 2.0 # 2 kOhm\nGain = -Rf / R1\n\nt = np.linspace(0, 0.01, 500)\nv_in = 1.0 * np.sin(2 * np.pi * 500 * t)\nv_out = Gain * v_in\n\nvlab.plot(t, v_out, label=f\"Gain={Gain:.1f}\", title=\"Inverting Op-Amp Output\")\nprint(f\"Closed-loop Voltage Gain: {Gain:.2f}\")\n",
+      "parameters": [
+        {
+          "name": "Rf",
+          "kind": "slider",
+          "default": 10,
+          "min": 1,
+          "max": 50,
+          "step": 1,
+          "label": "Feedback Rf (kOhms)"
+        }
+      ],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Inverting Op-Amp Output"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 300,
+      "matlabNotes": "Scalar multiplication Gain * v_in",
+      "enabled": true
+    },
+    {
+      "id": "BEE-06",
+      "title": "Logic Gates and Truth Tables",
+      "course": "BEE",
+      "level": "UG",
+      "objective": "Verify truth tables of basic (AND, OR, NOT) and universal (NAND, NOR) logic gates.",
+      "theory": "Universal gates (NAND, NOR) can realize all boolean functions by combination.",
+      "starterCode": "# BEE-06: Logic Gates & Truth Table\nimport numpy as np\nimport vlab\n\nA = np.array([0, 0, 1, 1], dtype=bool)\nB = np.array([0, 1, 0, 1], dtype=bool)\n\nAND_out = A & B\nOR_out = A | B\nNAND_out = ~(A & B)\nXOR_out = A ^ B\n\nvlab.plot(np.arange(4), XOR_out.astype(float), label=\"XOR Output\", title=\"Logic Gate Truth Table Profile\")\nprint(f\"Inputs:\nA: {A.astype(int)}\nB: {B.astype(int)}\nXOR: {XOR_out.astype(int)}\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Logic Gate Truth Table Profile"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 250,
+      "matlabNotes": "Bitwise logic & | ~ ^ in numpy",
+      "enabled": true
+    },
+    {
+      "id": "BEE-07",
+      "title": "RC High-Pass and Low-Pass Filters",
+      "course": "BEE",
+      "level": "UG",
+      "objective": "Demonstrate filtering and phase shift of RC networks over audio frequency ranges.",
+      "theory": "Cutoff frequency is given by $f_c = \\frac{1}{2\\pi R C}$ where output drops to $\\frac{1}{\\sqrt{2}} \\approx 0.707$ of input.",
+      "starterCode": "# BEE-07: RC Filter Frequency Response\nimport numpy as np\nimport vlab\n\nR = 1000.0 # 1 kOhm\nC = 0.1e-6 # 0.1 uF\nfc = 1 / (2 * np.pi * R * C)\n\nf = np.logspace(1, 5, 200)\nw = 2 * np.pi * f\nH_lowpass = 1 / (1 + 1j * w * R * C)\nmag_db = 20 * np.log10(np.abs(H_lowpass))\n\nvlab.plot(f, mag_db, label=\"Low-Pass Response (dB)\", title=\"RC Filter Frequency Response\")\nprint(f\"Filter Cutoff Frequency: {fc:.1f} Hz\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "RC Filter Frequency Response"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 300,
+      "matlabNotes": "semilogx() -> log-scaled axis in vlab",
+      "enabled": true
+    },
+    {
+      "id": "ACS-01",
+      "title": "Digital Modulation Schemes",
+      "course": "ACS",
+      "level": "PG",
+      "objective": "Simulate and plot constellation diagrams for BPSK, QPSK, 16-QAM, and 64-QAM digital modulation.",
+      "theory": "M-ary QAM represents $\\log_2(M)$ bits per symbol by modulating in-phase ($I$) and quadrature ($Q$) carrier amplitudes.",
+      "starterCode": "# ACS-01: Digital Modulation\nimport numpy as np\nimport vlab\n\n# Generate 16-QAM Constellation\npts_1d = np.array([-3, -1, 1, 3])\nI, Q = np.meshgrid(pts_1d, pts_1d)\nsymbols = (I + 1j * Q).flatten()\n\nvlab.plot(np.real(symbols), np.imag(symbols), label=\"16-QAM Constellation\", title=\"16-QAM Constellation Diagram\")\nprint(f\"Generated 16-QAM constellation with {len(symbols)} points\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "16-QAM Constellation Diagram"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 300,
+      "matlabNotes": "qammod(x, 16) -> meshgrid complex mapping",
+      "enabled": true
+    },
+    {
+      "id": "ACS-02",
+      "title": "Monte Carlo BER in AWGN versus Theory",
+      "course": "ACS",
+      "level": "PG",
+      "objective": "Perform Monte Carlo simulation of BPSK bit error rate (BER) in AWGN channel and compare against theoretical $Q(\\sqrt{2E_b/N_0})$.",
+      "theory": "Theoretical BPSK BER: $P_b = \\frac{1}{2} \\operatorname{erfc}\\left(\\sqrt{\\frac{E_b}{N_0}}\\right)$.",
+      "starterCode": "# ACS-02: BPSK BER in AWGN vs Theory\nimport numpy as np\nfrom scipy import special\nimport vlab\n\nebno_db = np.array([0, 2, 4, 6, 8, 10])\nebno_lin = 10 ** (ebno_db / 10.0)\ntheory_ber = 0.5 * special.erfc(np.sqrt(ebno_lin))\n\nvlab.plot(ebno_db, np.log10(theory_ber), label=\"Theoretical BER (log10)\", title=\"BPSK BER Performance\")\nprint(f\"At Eb/N0 = 6 dB: Theoretical BER = {theory_ber[3]:.4e}\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "BPSK BER Performance"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 400,
+      "matlabNotes": "berawgn(EbNo, 'psk', 2, 'nodiff') -> 0.5 * erfc(sqrt(EbNo_lin))",
+      "enabled": true
+    },
+    {
+      "id": "ACS-03",
+      "title": "Pulse Shaping and Eye Diagram",
+      "course": "ACS",
+      "level": "PG",
+      "objective": "Design Root-Raised Cosine (RRC) pulse shaping filters and evaluate inter-symbol interference (ISI).",
+      "theory": "RRC filter with roll-off $\\alpha$ limits bandwidth while satisfying the Nyquist criterion for zero ISI.",
+      "starterCode": "# ACS-03: Pulse Shaping & RRC Filter\nimport numpy as np\nimport vlab\n\nalpha = vlab.param(\"alpha\", 0.35, 0.1, 0.9, 0.05, label=\"Roll-off Factor\")\nN_taps = 65\nt = np.linspace(-4, 4, N_taps)\n\n# Sinc with raised cosine envelope\nh_rrc = np.sinc(t) * np.cos(np.pi * float(alpha) * t) / (1 - (2 * float(alpha) * t) ** 2 + 1e-12)\n\nvlab.plot(t, h_rrc, label=f\"RRC alpha={alpha}\", title=\"Root-Raised Cosine Pulse\")\nprint(f\"RRC Filter generated with roll-off alpha = {alpha}\")\n",
+      "parameters": [
+        {
+          "name": "alpha",
+          "kind": "slider",
+          "default": 0.35,
+          "min": 0.1,
+          "max": 0.9,
+          "step": 0.05,
+          "label": "Roll-off Factor"
+        }
+      ],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Root-Raised Cosine Pulse"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 350,
+      "matlabNotes": "rcosdesign(beta, span, sps) -> RRC impulse formula",
+      "enabled": true
+    },
+    {
+      "id": "ACS-04",
+      "title": "Matched Filter and Optimal Receiver",
+      "course": "ACS",
+      "level": "PG",
+      "objective": "Demonstrate that the matched filter maximizes SNR at the sampling instant in white Gaussian noise.",
+      "theory": "The matched filter impulse response is $h(t) = s^*(T - t)$, producing peak output $\\int |s(t)|^2 dt$.",
+      "starterCode": "# ACS-04: Matched Filter\nimport numpy as np\nfrom scipy import signal\nimport vlab\n\n# Rectangular pulse template\npulse = np.ones(20)\nnoisy_signal = np.concatenate([np.zeros(30), pulse, np.zeros(50)]) + np.random.normal(0, 0.3, 100)\n\n# Matched filter\nh_matched = pulse[::-1]\noutput = signal.convolve(noisy_signal, h_matched, mode=\"same\")\n\nvlab.plot(np.arange(len(output)), output, label=\"Matched Filter Output\", title=\"Matched Filter SNR Maximization\")\nprint(f\"Matched filter output peak: {output.max():.2f}\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Matched Filter SNR Maximization"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 350,
+      "matlabNotes": "conv(r, fliplr(s)) -> signal.convolve(r, s[::-1])",
+      "enabled": true
+    },
+    {
+      "id": "ACS-05",
+      "title": "Fading Channels and Diversity Combining",
+      "course": "ACS",
+      "level": "PG",
+      "objective": "Simulate Rayleigh and Rician flat fading channels and evaluate Maximal Ratio Combining (MRC).",
+      "theory": "MRC diversity with $L$ independent antennas achieves diversity order $L$, drastically reducing outage probability.",
+      "starterCode": "# ACS-05: Rayleigh Fading & MRC Diversity\nimport numpy as np\nimport vlab\n\nN = 10000\n# 2-branch Rayleigh channels\nh1 = (np.random.normal(0, 1, N) + 1j * np.random.normal(0, 1, N)) / np.sqrt(2)\nh2 = (np.random.normal(0, 1, N) + 1j * np.random.normal(0, 1, N)) / np.sqrt(2)\n\ngamma_1 = np.abs(h1) ** 2\ngamma_mrc = np.abs(h1) ** 2 + np.abs(h2) ** 2\n\nvlab.plot(np.sort(gamma_1), np.linspace(0, 1, N), label=\"Single Antenna\", title=\"Rayleigh vs MRC Diversity CDF\")\nprint(f\"Mean SNR single: {gamma_1.mean():.2f}, Mean SNR 2-branch MRC: {gamma_mrc.mean():.2f}\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Rayleigh vs MRC Diversity CDF"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 400,
+      "matlabNotes": "raylrnd() -> complex normal magnitude",
+      "enabled": true
+    },
+    {
+      "id": "ACS-06",
+      "title": "OFDM Transceiver with Cyclic Prefix",
+      "course": "ACS",
+      "level": "PG",
+      "objective": "Implement complete Orthogonal Frequency Division Multiplexing (OFDM) chain with IFFT/FFT and cyclic prefix.",
+      "theory": "Cyclic Prefix converts linear channel convolution into circular convolution, enabling simple 1-tap frequency domain equalization.",
+      "starterCode": "# ACS-06: OFDM Transceiver\nimport numpy as np\nimport vlab\n\nN_subcarriers = 64\ncp_len = 16\n\n# QPSK data on subcarriers\ndata_bits = np.random.choice([1+1j, 1-1j, -1+1j, -1-1j], size=N_subcarriers)\nofdm_time = np.fft.ifft(data_bits)\n\n# Add Cyclic Prefix\nofdm_tx = np.concatenate([ofdm_time[-cp_len:], ofdm_time])\n\nvlab.plot(np.arange(len(ofdm_tx)), np.real(ofdm_tx), label=\"OFDM Symbol Real Part\", title=\"OFDM Time-Domain Waveform\")\nprint(f\"Transmitted OFDM frame with {N_subcarriers} subcarriers + {cp_len} CP samples\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "OFDM Time-Domain Waveform"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 350,
+      "matlabNotes": "ifft(data) -> np.fft.ifft(data)",
+      "enabled": true
+    },
+    {
+      "id": "ACS-07",
+      "title": "MIMO Channel Capacity and Spatial Multiplexing",
+      "course": "ACS",
+      "level": "PG",
+      "objective": "Calculate ergodic capacity of $N_t \\times N_r$ MIMO channels and simulate Zero-Forcing (ZF) receiver.",
+      "theory": "MIMO capacity: $C = \\log_2 \\det\\left(I + \\frac{\\rho}{N_t} H H^H\\right)$.",
+      "starterCode": "# ACS-07: 2x2 MIMO Capacity\nimport numpy as np\nimport vlab\n\nsnr_db = np.linspace(0, 30, 31)\nsnr_lin = 10 ** (snr_db / 10.0)\n\n# 2x2 Rayleigh channel matrix H\nH = (np.random.normal(0, 1, (2, 2)) + 1j * np.random.normal(0, 1, (2, 2))) / np.sqrt(2)\nsingular_vals = np.linalg.svd(H, compute_uv=False)\n\ncapacity = np.sum([np.log2(1 + (snr_lin / 2) * (s ** 2)) for s in singular_vals], axis=0)\n\nvlab.plot(snr_db, capacity, label=\"2x2 MIMO\", title=\"MIMO Channel Capacity (bps/Hz)\")\nprint(f\"Capacity at 20 dB SNR: {capacity[20]:.2f} bps/Hz\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "MIMO Channel Capacity (bps/Hz)"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 400,
+      "matlabNotes": "svd(H) -> np.linalg.svd(H, compute_uv=False)",
+      "enabled": true
+    },
+    {
+      "id": "ACS-08",
+      "title": "Carrier and Timing Synchronisation",
+      "course": "ACS",
+      "level": "PG",
+      "objective": "Implement Costas loop phase-locked loop (PLL) for carrier recovery and Gardner Timing Error Detector (TED).",
+      "theory": "The Costas loop phase detector computes $e[n] = I[n] \\cdot Q[n]$ to track carrier frequency offset.",
+      "starterCode": "# ACS-08: Costas Loop Carrier Recovery\nimport numpy as np\nimport vlab\n\nN = 500\nt = np.arange(N)\ncarrier_offset = 0.05 # rad/sample\nphase_true = carrier_offset * t\n\n# Phase tracking loop simulation\nphase_est = np.zeros(N)\nerror_sig = np.zeros(N)\nmu = 0.05\n\nfor i in range(1, N):\n    phase_diff = phase_true[i] - phase_est[i-1]\n    error = np.sin(phase_diff)\n    error_sig[i] = error\n    phase_est[i] = phase_est[i-1] + mu * error\n\nvlab.plot(t, phase_est, label=\"Phase Estimate\", title=\"Costas Loop Carrier Phase Tracking\")\nprint(f\"Converged carrier phase slope: {(phase_est[-1]-phase_est[-50])/50:.4f}\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Costas Loop Carrier Phase Tracking"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 400,
+      "matlabNotes": "Loop iteration over phase tracking",
+      "enabled": true
+    },
+    {
+      "id": "SSP-01",
+      "title": "Random Processes and Autocorrelation",
+      "course": "SSP",
+      "level": "PG",
+      "objective": "Generate wide-sense stationary (WSS) random processes and compute sample autocorrelation function (ACF).",
+      "theory": "For ergodic processes, time average $\\hat{R}_{xx}[k] = \\frac{1}{N} \\sum_{n=0}^{N-1-|k|} x[n] x[n+k]$ converges to ensemble $E[x[n]x[n+k]]$.",
+      "starterCode": "# SSP-01: Autocorrelation of Random Process\nimport numpy as np\nimport vlab\n\nnp.random.seed(42)\nN = 1000\n# AR(1) process: x[n] = 0.8*x[n-1] + w[n]\nw = np.random.normal(0, 1, N)\nx = np.zeros(N)\nfor n in range(1, N):\n    x[n] = 0.8 * x[n-1] + w[n]\n\n# Compute sample ACF\nacf = np.correlate(x - x.mean(), x - x.mean(), mode=\"full\") / N\nlags = np.arange(-N + 1, N)\n\ncenter = len(acf) // 2\nvlab.plot(lags[center-50:center+50], acf[center-50:center+50], label=\"Sample ACF\", title=\"AR(1) Autocorrelation Function\")\nprint(f\"Variance estimate R(0): {acf[center]:.2f}\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "AR(1) Autocorrelation Function"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 350,
+      "matlabNotes": "xcorr(x, 'biased') -> np.correlate(x, x, mode='full') / N",
+      "enabled": true
+    },
+    {
+      "id": "SSP-02",
+      "title": "Non-Parametric Spectral Estimation (Welch Method)",
+      "course": "SSP",
+      "level": "PG",
+      "objective": "Compare raw periodogram, Bartlett averaged periodogram, and Welch overlapping segment averaging.",
+      "theory": "Welch method reduces periodogram variance by averaging $50\\%$ overlapping Hann-windowed segments.",
+      "starterCode": "# SSP-02: Welch Spectral Estimation\nimport numpy as np\nfrom scipy import signal\nimport vlab\n\nnp.random.seed(42)\nfs = 1000\nt = np.linspace(0, 1, fs)\nx = np.sin(2 * np.pi * 100 * t) + np.sin(2 * np.pi * 250 * t) + np.random.normal(0, 1, fs)\n\nf, Pxx = signal.welch(x, fs, nperseg=256)\n\nvlab.plot(f, 10 * np.log10(Pxx + 1e-12), label=\"Welch PSD (dB/Hz)\", title=\"Power Spectral Density Estimate\")\nprint(f\"Identified peaks around 100 Hz and 250 Hz\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Power Spectral Density Estimate"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 350,
+      "matlabNotes": "pwelch(x, 256) -> scipy.signal.welch(x, fs, nperseg=256)",
+      "enabled": true
+    },
+    {
+      "id": "SSP-03",
+      "title": "Parametric Spectral Estimation (AR via Yule-Walker)",
+      "course": "SSP",
+      "level": "PG",
+      "objective": "Estimate Autoregressive (AR) model parameters using Yule-Walker normal equations and Levinson-Durbin recursion.",
+      "theory": "The Yule-Walker equations relate model parameters $a_k$ to the autocorrelation sequence $R_{xx}$.",
+      "starterCode": "# SSP-03: AR Yule-Walker Spectral Estimation\nimport numpy as np\nfrom scipy import linalg\nimport vlab\n\n# True AR(2) coefficients: [1, -0.9, 0.8]\nr = np.array([2.5, 1.2, 0.4]) # Sample autocorrelation\nR_toeplitz = linalg.toeplitz(r[:2])\na_params = linalg.solve(R_toeplitz, -r[1:])\n\nw = np.linspace(0, np.pi, 256)\nA_poly = 1 + a_params[0] * np.exp(-1j * w) + a_params[1] * np.exp(-2j * w)\nPSD_ar = 1.0 / (np.abs(A_poly) ** 2)\n\nvlab.plot(w / np.pi, 10 * np.log10(PSD_ar), label=\"AR(2) PSD\", title=\"Parametric Yule-Walker Spectrum\")\nprint(f\"Estimated AR(2) parameters: a1 = {a_params[0]:.3f}, a2 = {a_params[1]:.3f}\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Parametric Yule-Walker Spectrum"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 350,
+      "matlabNotes": "aryule(x, p) -> linalg.solve(toeplitz(r), -r)",
+      "enabled": true
+    },
+    {
+      "id": "SSP-04",
+      "title": "Wiener Filtering and Optimal Estimation",
+      "course": "SSP",
+      "level": "PG",
+      "objective": "Design optimal causal and non-causal FIR Wiener filters to minimize Mean Squared Error (MSE).",
+      "theory": "Wiener-Hopf equations $R_{xx} w_{opt} = r_{dx}$ minimize $E[(d[n] - \\hat{d}[n])^2]$.",
+      "starterCode": "# SSP-04: FIR Wiener Filter\nimport numpy as np\nfrom scipy import linalg, signal\nimport vlab\n\nnp.random.seed(42)\nN = 500\nd = np.sin(2 * np.pi * 0.05 * np.arange(N)) # Desired clean signal\nnoise = np.random.normal(0, 0.5, N)\nx = d + noise # Noisy observation\n\n# Compute Wiener filter of order M=10\nM = 10\nr_xx = np.correlate(x, x, mode=\"full\")[N-1:N-1+M] / N\nr_dx = np.correlate(d, x, mode=\"full\")[N-1:N-1+M] / N\n\nw_opt = linalg.solve(linalg.toeplitz(r_xx), r_dx)\nd_hat = signal.lfilter(w_opt, 1, x)\n\nvlab.plot(np.arange(100), d_hat[:100], label=\"Wiener Estimate\", title=\"Optimal Signal Recovery\")\nprint(f\"Estimated optimal Wiener coefficients: {np.round(w_opt, 3)}\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Optimal Signal Recovery"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 350,
+      "matlabNotes": "wiener2() -> custom normal equations",
+      "enabled": true
+    },
+    {
+      "id": "SSP-05",
+      "title": "Adaptive Filters (LMS and RLS)",
+      "course": "SSP",
+      "level": "PG",
+      "objective": "Implement Least Mean Squares (LMS) and Recursive Least Squares (RLS) adaptive filters for system identification.",
+      "theory": "LMS weight update equation: $w[n+1] = w[n] + \\mu e[n] x[n]$, converging to Wiener solution.",
+      "starterCode": "# SSP-05: LMS Adaptive Filter\nimport numpy as np\nimport vlab\n\nnp.random.seed(42)\nN = 1000\nx = np.random.normal(0, 1, N)\n# Unknown system impulse response\nh_true = np.array([0.3, -0.5, 0.8, -0.2])\n\nd = np.convolve(x, h_true)[:N] + np.random.normal(0, 0.05, N)\n\n# LMS adaptation\nM = 4\nmu = 0.02\nw = np.zeros(M)\nerrors = np.zeros(N)\n\nfor n in range(M, N):\n    x_vec = x[n:n-M:-1]\n    y = np.dot(w, x_vec)\n    e = d[n] - y\n    errors[n] = e ** 2\n    w += mu * e * x_vec\n\nvlab.plot(np.arange(N), errors, label=\"Squared Error e^2[n]\", title=\"LMS Learning Curve\")\nprint(f\"True weights: {h_true}\nLearned weights: {np.round(w, 3)}\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "LMS Learning Curve"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 400,
+      "matlabNotes": "dsp.LMSFilter -> Python loop update",
+      "enabled": true
+    },
+    {
+      "id": "SSP-06",
+      "title": "Kalman Filter for Object Tracking",
+      "course": "SSP",
+      "level": "PG",
+      "objective": "Implement linear Kalman filter for 1D constant-velocity target position and velocity tracking.",
+      "theory": "Kalman filter alternates between Predict ($x_{k|k-1} = F x_{k-1}$) and Update ($K_k = P_{k|k-1} H^T (H P_{k|k-1} H^T + R)^{-1}$).",
+      "starterCode": "# SSP-06: 1D Constant Velocity Kalman Filter\nimport numpy as np\nimport vlab\n\nnp.random.seed(42)\nN = 100\ndt = 0.1\n\n# State transition matrix [pos, vel]\nF = np.array([[1, dt], [0, 1]])\nH = np.array([[1, 0]])\nQ = np.array([[0.01, 0], [0, 0.01]])\nR = 1.0\n\n# Generate true trajectory & noisy measurements\nx_true = np.zeros((2, N))\nx_true[:, 0] = [0, 2.0] # start at 0, moving at 2 m/s\nfor k in range(1, N):\n    x_true[:, k] = F @ x_true[:, k-1] + np.random.multivariate_normal([0, 0], Q)\n\nz = x_true[0, :] + np.random.normal(0, np.sqrt(R), N)\n\n# Kalman filter loop\nx_est = np.zeros((2, N))\nP = np.eye(2)\n\nfor k in range(N):\n    if k > 0:\n        x_pred = F @ x_est[:, k-1]\n        P_pred = F @ P @ F.T + Q\n    else:\n        x_pred = np.array([0, 0])\n        P_pred = P\n\n    K = P_pred @ H.T / (H @ P_pred @ H.T + R)\n    x_est[:, k] = x_pred + K.flatten() * (z[k] - H @ x_pred)\n    P = (np.eye(2) - K @ H) @ P_pred\n\nvlab.plot(np.arange(N) * dt, x_est[0, :], label=\"Kalman Estimate\", title=\"Target Tracking Position\")\nprint(f\"Tracking RMS position error: {np.sqrt(np.mean((x_true[0, :] - x_est[0, :]) ** 2)):.3f} m\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Target Tracking Position"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 400,
+      "matlabNotes": "Matrix multiplication A * B in MATLAB -> A @ B in Python",
+      "enabled": true
+    },
+    {
+      "id": "SSP-07",
+      "title": "Estimation Theory (MLE and CRLB)",
+      "course": "SSP",
+      "level": "PG",
+      "objective": "Evaluate Maximum Likelihood Estimator (MLE) and compare empirical variance against the Cramer-Rao Lower Bound (CRLB).",
+      "theory": "For DC level estimation in AWGN, CRLB is $\\operatorname{var}(\\hat{A}) \\ge \\frac{\\sigma^2}{N}$.",
+      "starterCode": "# SSP-07: MLE vs CRLB\nimport numpy as np\nimport vlab\n\nnp.random.seed(42)\nA_true = 2.0\nsigma2 = 1.0\nN_samples = np.array([10, 20, 50, 100, 200])\ncrlb = sigma2 / N_samples\n\n# Monte Carlo variance calculation\nvariances = []\nfor N in N_samples:\n    estimates = [np.mean(A_true + np.random.normal(0, np.sqrt(sigma2), N)) for _ in range(500)]\n    variances.append(np.var(estimates))\n\nvlab.plot(N_samples, crlb, label=\"Theoretical CRLB\", title=\"MLE Variance vs CRLB\")\nprint(f\"At N=100: Empirical Var = {variances[3]:.4f}, CRLB = {crlb[3]:.4f}\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "MLE Variance vs CRLB"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 450,
+      "matlabNotes": "var(x) -> np.var(x)",
+      "enabled": true
+    },
+    {
+      "id": "SSP-08",
+      "title": "Detection Theory and Receiver Operating Characteristic (ROC)",
+      "course": "SSP",
+      "level": "PG",
+      "objective": "Simulate binary hypothesis testing (Neyman-Pearson criterion) and plot Receiver Operating Characteristic (ROC) curves.",
+      "theory": "Under Gaussian noise, detection probability $P_D = Q(Q^{-1}(P_{FA}) - d)$, where $d = \\sqrt{E/N_0}$ is the deflection coefficient.",
+      "starterCode": "# SSP-08: Neyman-Pearson ROC Curves\nimport numpy as np\nfrom scipy import stats\nimport vlab\n\npfa = np.linspace(0.001, 0.999, 200)\n# Deflection coefficients d = 1, 2, 3\nd_vals = [1.0, 2.0, 3.0]\n\nfor d in d_vals:\n    pd = stats.norm.sf(stats.norm.isf(pfa) - d)\n    # plot first curve\n    if d == 2.0:\n        vlab.plot(pfa, pd, label=f\"d={d}\", title=\"Receiver Operating Characteristic (ROC)\")\n\nprint(\"Evaluated Neyman-Pearson detection probabilities across varying deflection SNR\")\n",
+      "parameters": [],
+      "expectedOutputs": [
+        {
+          "kind": "plot",
+          "name": "Receiver Operating Characteristic (ROC)"
+        }
+      ],
+      "requiredPackages": [
+        "numpy",
+        "scipy"
+      ],
+      "estimatedRuntimeMs": 350,
+      "matlabNotes": "qfunc() -> scipy.stats.norm.sf()",
+      "enabled": true
+    }
+  ]
+}

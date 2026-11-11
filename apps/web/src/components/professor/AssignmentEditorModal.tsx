@@ -33,9 +33,9 @@ export const AssignmentEditorModal: React.FC<AssignmentEditorModalProps> = ({
   initialData,
 }) => {
   const [courseCode, setCourseCode] = useState<AssignmentFormData["courseCode"]>(
-    initialData?.courseCode || "DSP",
+    initialData?.courseCode || "NT",
   );
-  const [experimentId, setExperimentId] = useState<string>(initialData?.experimentId || "DSP-01");
+  const [experimentId, setExperimentId] = useState<string>(initialData?.experimentId || "NT-01");
   const [title, setTitle] = useState<string>(
     initialData?.title || "Lab Assignment: DFT & Spectral Analysis",
   );

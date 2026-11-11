@@ -8,13 +8,8 @@ interface CatalogPageProps {
 }
 
 const COURSES: { code: CourseCode; name: string; level: CourseLevel }[] = [
-  { code: "SS", name: "Signals and Systems", level: "UG" },
-  { code: "NT", name: "Network Theory", level: "UG" },
-  { code: "DSP", name: "Digital Signal Processing", level: "UG" },
-  { code: "DIP", name: "Digital Image Processing", level: "UG" },
-  { code: "BEE", name: "Basics of Electronics Engineering", level: "UG" },
-  { code: "ACS", name: "Advanced Communication Systems", level: "PG" },
-  { code: "SSP", name: "Statistical Signal Processing", level: "PG" },
+  { code: "NT", name: "Network & Electronics Circuits (IIT (ISM) Dhanbad)", level: "UG" },
+  { code: "BEE", name: "Basic Electrical Engineering (IIT (ISM) Dhanbad)", level: "UG" },
 ];
 
 export const Catalog: React.FC<CatalogPageProps> = ({ onSelectExperiment }) => {
@@ -48,9 +43,11 @@ export const Catalog: React.FC<CatalogPageProps> = ({ onSelectExperiment }) => {
             VL
           </div>
           <div>
-            <h1 className="font-bold text-base leading-none">ECE Virtual Laboratory</h1>
+            <h1 className="font-bold text-base leading-none">
+              IIT (ISM) Dhanbad Virtual Lab · Circuit Simulator
+            </h1>
             <p className="text-[11px] text-fg-muted mt-0.5">
-              Interactive Pyodide Simulation Curriculum
+              Interactive Circuit Maker, Custom Parameter Controls & Real-Time AC/DC Simulation
             </p>
           </div>
         </div>
@@ -114,7 +111,7 @@ export const Catalog: React.FC<CatalogPageProps> = ({ onSelectExperiment }) => {
               onChange={(e) => setSelectedCourse(e.target.value as "ALL" | CourseCode)}
               className="rounded-lg border border-line bg-surface-2 px-3 py-1.5 text-xs font-medium text-fg"
             >
-              <option value="ALL">All 7 Course Modules</option>
+              <option value="ALL">All IIT (ISM) Modules (4 Labs)</option>
               {COURSES.map((c) => (
                 <option key={c.code} value={c.code}>
                   [{c.code}] {c.name} ({c.level})
@@ -138,10 +135,7 @@ export const Catalog: React.FC<CatalogPageProps> = ({ onSelectExperiment }) => {
         </div>
 
         {/* Experiment Cards Grid */}
-        <div
-          data-testid="experiment-grid"
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
-        >
+        <div data-testid="experiment-grid" className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {filteredExperiments.map((exp) => (
             <div
               key={exp.id}
@@ -166,15 +160,31 @@ export const Catalog: React.FC<CatalogPageProps> = ({ onSelectExperiment }) => {
                         : "bg-purple-500/10 text-purple-700 dark:text-purple-300"
                     }`}
                   >
-                    {exp.level}
+                    {exp.institute || exp.level}
                   </span>
                 </div>
+
+                {/* Schematic Image Thumbnail */}
+                {exp.imageUrl && (
+                  <div className="rounded-lg border border-line bg-white p-2 overflow-hidden">
+                    <img
+                      src={exp.imageUrl}
+                      alt={`${exp.title} circuit schematic`}
+                      className="w-full h-36 object-contain"
+                    />
+                  </div>
+                )}
 
                 {/* Title and Objective */}
                 <div>
                   <h3 className="font-bold text-sm text-fg group-hover:text-brand transition-colors">
                     {exp.title}
                   </h3>
+                  {exp.labName && (
+                    <div className="text-[10px] font-medium text-brand mt-0.5 truncate">
+                      {exp.labName}
+                    </div>
+                  )}
                   <p className="mt-1.5 text-xs text-fg-muted line-clamp-3 leading-relaxed">
                     {exp.objective}
                   </p>
@@ -190,7 +200,7 @@ export const Catalog: React.FC<CatalogPageProps> = ({ onSelectExperiment }) => {
                   </div>
                   <div className="flex items-center gap-1">
                     <Layers className="h-3 w-3" />
-                    <span>{exp.parameters.length} sliders</span>
+                    <span>{exp.parameters.length} controls</span>
                   </div>
                 </div>
 

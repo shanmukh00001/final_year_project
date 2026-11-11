@@ -6,48 +6,54 @@ import {
 } from "../src/data/curriculum/index.js";
 import { ExperimentSchema } from "@vlab/shared";
 
-describe("Phase 5: Experiment Curriculum Validation (AC-CAT)", () => {
-  test("AC-CAT-001: Curriculum lists all 7 courses with exact experiment counts and UG/PG tags", () => {
-    const courses = ["SS", "NT", "DSP", "DIP", "BEE", "ACS", "SSP"];
-
-    // Check all 7 courses exist
-    for (const c of courses) {
-      const exps = getExperimentsByCourse(c);
-      expect(exps.length).toBeGreaterThanOrEqual(7);
-    }
-
-    // Check UG / PG breakdown
+describe("Phase 5: IIT (ISM) Dhanbad Virtual Lab Curriculum Validation (4 Active Labs)", () => {
+  test("AC-CAT-001: Curriculum exposes the 4 configured IIT (ISM) experiments across NT and BEE", () => {
+    const ntExps = getExperimentsByCourse("NT");
+    const beeExps = getExperimentsByCourse("BEE");
     const ugExps = getExperimentsByLevel("UG");
-    const pgExps = getExperimentsByLevel("PG");
 
-    expect(ugExps.length).toBe(35); // 5 UG courses * 7 exps
-    expect(pgExps.length).toBe(16); // 2 PG courses * 8 exps
-    expect(VALIDATED_EXPERIMENTS.length).toBe(51);
+    expect(ntExps.length).toBe(3);
+    expect(beeExps.length).toBe(1);
+    expect(ugExps.length).toBe(4);
+    expect(VALIDATED_EXPERIMENTS.length).toBe(4);
+    expect(VALIDATED_EXPERIMENTS.map((e) => e.id)).toEqual(["NT-01", "BEE-01", "ELC-01", "ELC-02"]);
   });
 
-  test("AC-CAT-003: Every experiment satisfies JSON schema constraints", () => {
+  test("AC-CAT-003: Every experiment satisfies extended IIT (ISM) JSON schema constraints", () => {
     for (const exp of VALIDATED_EXPERIMENTS) {
       const result = ExperimentSchema.safeParse(exp);
       expect(result.success).toBe(true);
+      expect(exp.institute).toBe("IIT (ISM) Dhanbad");
+      expect(exp.imageUrl).toMatch(/^\/images\/.+\.(jpg|png)$/);
       expect(exp.title.length).toBeGreaterThan(3);
-      expect(exp.starterCode.length).toBeGreaterThan(10);
       expect(exp.objective.length).toBeGreaterThan(10);
-      expect(exp.estimatedRuntimeMs).toBeGreaterThan(0);
+      expect((exp.aimDetails || []).length).toBeGreaterThan(0);
+      expect((exp.procedureSteps || []).length).toBeGreaterThan(0);
+      expect((exp.pretest || []).length).toBeGreaterThan(0);
+      expect((exp.posttest || []).length).toBeGreaterThan(0);
     }
   });
 
-  test("AC-CAT-002: Experiments by ID lookup retrieves accurate starterCode and metadata", () => {
-    const dsp03 = getExperimentById("DSP-03");
-    expect(dsp03).toBeDefined();
-    expect(dsp03?.title).toBe("FIR Filter Design");
-    expect(dsp03?.course).toBe("DSP");
-    expect(dsp03?.parameters.length).toBe(2);
-    expect(dsp03?.starterCode).toContain("vlab.param");
+  test("AC-CAT-002: Experiments by ID lookup retrieves RLC, Ohm's Law, RC Low-Pass Filter & Zener Diode", () => {
+    const rlc = getExperimentById("NT-01");
+    expect(rlc).toBeDefined();
+    expect(rlc?.title).toBe("R-L-C Circuit Analysis");
+    expect(rlc?.imageUrl).toBe("/images/rlc-circuit-setup.jpg");
+    expect(rlc?.parameters.length).toBe(6);
 
-    const acs02 = getExperimentById("ACS-02");
-    expect(acs02).toBeDefined();
-    expect(acs02?.title).toContain("BER in AWGN");
-    expect(acs02?.level).toBe("PG");
+    const ohm = getExperimentById("BEE-01");
+    expect(ohm).toBeDefined();
+    expect(ohm?.title).toContain("Ohm's Law");
+    expect(ohm?.imageUrl).toBe("/images/ohms-law-bench.jpg");
+    expect(ohm?.theory).toContain("V = I");
+
+    const rc = getExperimentById("ELC-01");
+    expect(rc).toBeDefined();
+    expect(rc?.title).toContain("RC Low-Pass Filter");
+
+    const zen = getExperimentById("ELC-02");
+    expect(zen).toBeDefined();
+    expect(zen?.title).toContain("Zener Diode");
   });
 
   test("Schema error rejection: Malformed experiment fails fast", () => {

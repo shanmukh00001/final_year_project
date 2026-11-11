@@ -24,14 +24,16 @@ export const EngineStatusPill: React.FC<EngineStatusPillProps> = ({
       colorClass = "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30";
       dotClass = "bg-amber-500 animate-pulse";
       isPulsing = true;
-      label = bootProgress?.message ? `Booting (${bootProgress.percent}%)` : "Booting Python...";
+      label = bootProgress?.message
+        ? `Booting (${bootProgress.percent}%)`
+        : "Initializing Simulator...";
       break;
 
     case "ready":
       colorClass = "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30";
       dotClass = "bg-emerald-500";
       // Show real package versions once available
-      label = runtimeInfo ? `Ready · Python ${runtimeInfo.pythonVersion}` : "Ready";
+      label = "Ready";
       break;
 
     case "running":

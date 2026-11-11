@@ -76,7 +76,7 @@ export const ConsolePane: React.FC = () => {
       <div className="flex-1 overflow-y-auto p-3 space-y-0.5 select-text font-mono text-[12px] leading-relaxed">
         {consoleLines.length === 0 ? (
           <div className="text-fg-subtle italic py-2">
-            No output. Press Run (Ctrl+Enter) to execute Python code.
+            No output. Click Simulate or Check Circuit to view logs.
           </div>
         ) : (
           consoleLines.map((line) => (

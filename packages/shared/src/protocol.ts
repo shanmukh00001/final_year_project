@@ -26,12 +26,13 @@ export type ParamValue = number | string | boolean;
 export interface ParamDecl {
   name: string;
   default: ParamValue;
-  min?: number;
-  max?: number;
-  step?: number;
-  label?: string;
+  min?: number | undefined;
+  max?: number | undefined;
+  step?: number | undefined;
+  label?: string | undefined;
+  unit?: string | undefined;
   kind: "slider" | "number" | "select" | "toggle";
-  options?: string[];
+  options?: string[] | undefined;
 }
 
 export interface VariableInfo {

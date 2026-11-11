@@ -14,6 +14,7 @@ export const ExperimentParamSchema = z.object({
   max: z.number().optional(),
   step: z.number().optional(),
   label: z.string().optional(),
+  unit: z.string().optional(),
   options: z.array(z.string()).optional(),
 });
 export type ExperimentParam = z.infer<typeof ExperimentParamSchema>;
@@ -25,6 +26,15 @@ export const ExperimentOutputExpectationSchema = z.object({
 });
 export type ExperimentOutputExpectation = z.infer<typeof ExperimentOutputExpectationSchema>;
 
+export const QuizQuestionSchema = z.object({
+  id: z.string(),
+  question: z.string(),
+  options: z.array(z.string()).min(2),
+  correctIndex: z.number().int().nonnegative(),
+  explanation: z.string(),
+});
+export type QuizQuestion = z.infer<typeof QuizQuestionSchema>;
+
 export const ExperimentSchema = z.object({
   id: z
     .string()
@@ -32,8 +42,18 @@ export const ExperimentSchema = z.object({
   title: z.string().min(3),
   course: CourseCodeSchema,
   level: CourseLevelSchema,
+  institute: z.string().optional(),
+  labName: z.string().optional(),
+  sourceUrl: z.string().optional(),
+  imageUrl: z.string().optional(),
   objective: z.string().min(10),
+  aimDetails: z.array(z.string()).optional(),
+  apparatus: z.array(z.string()).optional(),
   theory: z.string().min(10),
+  procedureSteps: z.array(z.string()).optional(),
+  pretest: z.array(QuizQuestionSchema).optional(),
+  posttest: z.array(QuizQuestionSchema).optional(),
+  references: z.array(z.string()).optional(),
   starterCode: z.string().min(5),
   parameters: z.array(ExperimentParamSchema).default([]),
   expectedOutputs: z.array(ExperimentOutputExpectationSchema).default([]),
