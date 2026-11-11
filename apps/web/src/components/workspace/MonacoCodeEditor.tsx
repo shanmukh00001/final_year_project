@@ -104,11 +104,7 @@ export const MonacoCodeEditor: React.FC<MonacoCodeEditorProps> = ({ theme, onCur
     } else if (currentModelVal !== code) {
       // Store code was updated externally (e.g. draft loaded or reset)
       const currentPos = ed.getPosition();
-      model.pushEditOperations(
-        [],
-        [{ range: model.getFullModelRange(), text: code }],
-        () => null,
-      );
+      model.pushEditOperations([], [{ range: model.getFullModelRange(), text: code }], () => null);
       if (currentPos) {
         ed.setPosition(currentPos);
       }
