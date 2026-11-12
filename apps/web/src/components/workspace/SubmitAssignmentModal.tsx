@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import {
   X,
   Send,
-  FileCode,
+  Cable,
   Sliders,
   BarChart2,
   CheckCircle2,
@@ -22,7 +22,7 @@ export const SubmitAssignmentModal: React.FC<SubmitAssignmentModalProps> = ({
   onClose,
   onSubmitSuccess,
 }) => {
-  const { code, params, figures, experimentId } = useWorkspaceStore();
+  const { wires, observationRows, params, figures, experimentId } = useWorkspaceStore();
   const [reportText, setReportText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -49,7 +49,8 @@ export const SubmitAssignmentModal: React.FC<SubmitAssignmentModalProps> = ({
     }, 800);
   };
 
-  const lineCount = code.split("\n").length;
+  const wireCount = wires.length;
+  const trialCount = observationRows.length;
   const paramCount = Object.keys(params).length;
   const figureCount = figures.length;
 
@@ -86,7 +87,8 @@ export const SubmitAssignmentModal: React.FC<SubmitAssignmentModalProps> = ({
             </div>
             <h3 className="text-sm font-bold text-fg">Assignment Submitted Successfully!</h3>
             <p className="text-xs text-fg-subtle max-w-xs">
-              Your Python code snapshot, parameters, and waveforms have been recorded for grading.
+              Your circuit wiring, component values, observation table, and waveforms have been
+              recorded for grading.
             </p>
           </div>
         ) : (
@@ -105,12 +107,14 @@ export const SubmitAssignmentModal: React.FC<SubmitAssignmentModalProps> = ({
               </span>
               <div className="grid grid-cols-3 gap-2 text-[11px] font-mono">
                 <div className="flex items-center gap-1.5 rounded bg-surface p-2 border border-line">
-                  <FileCode className="h-3.5 w-3.5 text-brand" />
-                  <span>{lineCount} lines code</span>
+                  <Cable className="h-3.5 w-3.5 text-brand" />
+                  <span>
+                    {wireCount} wires · {trialCount} trials
+                  </span>
                 </div>
                 <div className="flex items-center gap-1.5 rounded bg-surface p-2 border border-line">
                   <Sliders className="h-3.5 w-3.5 text-amber-500" />
-                  <span>{paramCount} params</span>
+                  <span>{paramCount} values</span>
                 </div>
                 <div className="flex items-center gap-1.5 rounded bg-surface p-2 border border-line">
                   <BarChart2 className="h-3.5 w-3.5 text-green-500" />

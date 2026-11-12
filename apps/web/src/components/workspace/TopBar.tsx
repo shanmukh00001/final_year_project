@@ -44,20 +44,8 @@ export const TopBar: React.FC<TopBarProps> = ({
     clearConsole,
     setLiveRun,
     loadExperiment,
-    exportCode,
     exportWorkspaceJson,
   } = useWorkspaceStore();
-
-  const handleExportPy = () => {
-    const code = exportCode();
-    const blob = new Blob([code], { type: "text/x-python" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${experimentId.toLowerCase()}.py`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
 
   const handleExportJson = () => {
     const json = exportWorkspaceJson();
@@ -81,7 +69,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           <span className="flex h-6 w-6 items-center justify-center rounded bg-brand text-white font-mono text-[11px]">
             VL
           </span>
-          <span className="font-semibold text-xs hidden sm:inline">V-Lab ECE</span>
+          <span className="font-semibold text-xs hidden sm:inline">V-Lab ECE · IIT (ISM)</span>
         </div>
 
         <span className="text-fg-subtle text-xs shrink-0">/</span>
@@ -150,19 +138,19 @@ export const TopBar: React.FC<TopBarProps> = ({
             data-testid="btn-run"
             onClick={runCode}
             disabled={!isReady}
-            className="flex items-center gap-1.5 rounded-md bg-brand px-3 py-1.5 font-medium text-white text-xs shadow-sm transition hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-40"
-            title="Run code (Ctrl/Cmd+Enter)"
+            className="flex items-center gap-1.5 rounded-md bg-brand px-3 py-1.5 font-medium text-white text-xs shadow-sm transition hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-40 whitespace-nowrap shrink-0"
+            title="Simulate Circuit (Ctrl/Cmd+Enter)"
           >
             <Play className="h-3.5 w-3.5 fill-current" />
-            <span>Run</span>
+            <span>Simulate</span>
           </button>
         ) : (
           <button
             type="button"
             data-testid="btn-stop"
             onClick={stopExecution}
-            className="flex items-center gap-1.5 rounded-md bg-danger-500 px-3 py-1.5 font-medium text-white text-xs shadow-sm transition hover:bg-danger-700"
-            title="Stop execution (Ctrl/Cmd+.)"
+            className="flex items-center gap-1.5 rounded-md bg-danger-500 px-3 py-1.5 font-medium text-white text-xs shadow-sm transition hover:bg-danger-700 whitespace-nowrap shrink-0"
+            title="Stop simulation"
           >
             <Square className="h-3.5 w-3.5 fill-current" />
             <span>Stop</span>
@@ -173,37 +161,37 @@ export const TopBar: React.FC<TopBarProps> = ({
           type="button"
           data-testid="btn-restart"
           onClick={restartKernel}
-          className="flex items-center gap-1.5 rounded-md border border-line-strong bg-surface-2 px-2.5 py-1.5 text-fg text-xs transition hover:bg-hover"
-          title="Restart Python Kernel"
+          className="flex items-center gap-1.5 rounded-md border border-line-strong bg-surface-2 px-2.5 py-1.5 text-fg text-xs transition hover:bg-hover whitespace-nowrap shrink-0"
+          title="Reset Circuit & Values"
         >
           <RotateCcw className="h-3.5 w-3.5" />
-          <span>Restart</span>
+          <span>Reset Circuit</span>
         </button>
 
         <button
           type="button"
           data-testid="btn-clear-console"
           onClick={clearConsole}
-          className="flex items-center gap-1.5 rounded-md border border-line-strong bg-surface-2 px-2.5 py-1.5 text-fg text-xs transition hover:bg-hover"
-          title="Clear Console Output"
+          className="flex items-center gap-1.5 rounded-md border border-line-strong bg-surface-2 px-2.5 py-1.5 text-fg text-xs transition hover:bg-hover whitespace-nowrap shrink-0"
+          title="Clear Circuit Log"
         >
           <Trash2 className="h-3.5 w-3.5" />
           <span>Clear</span>
         </button>
 
-        <div className="h-4 w-px bg-line" />
+        <div className="h-4 w-px bg-line shrink-0" />
 
         {/* Live Run Toggle */}
         <button
           type="button"
           data-testid="btn-toggle-live"
           onClick={() => setLiveRun(!liveRun)}
-          className={`flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs transition ${
+          className={`flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs transition whitespace-nowrap shrink-0 ${
             liveRun
               ? "border-accent-500 bg-accent-500/10 text-accent-600 dark:text-accent-400 font-medium"
               : "border-line-strong bg-surface-2 text-fg-muted hover:bg-hover"
           }`}
-          title="Toggle live execution on parameter adjustments"
+          title="Toggle live circuit simulation on value adjustments"
         >
           <Zap className="h-3.5 w-3.5" />
           <span>Live {liveRun ? "ON" : "OFF"}</span>
@@ -219,14 +207,14 @@ export const TopBar: React.FC<TopBarProps> = ({
           runtimeInfo={engineRuntimeInfo}
         />
 
-        <div className="h-4 w-px bg-line" />
+        <div className="h-4 w-px bg-line shrink-0" />
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           <button
             type="button"
             data-testid="btn-submit-lab"
             onClick={onOpenSubmitModal}
-            className="flex items-center gap-1.5 rounded bg-brand/10 border border-brand/20 px-2.5 py-1 text-brand font-semibold text-xs transition hover:bg-brand hover:text-white"
+            className="flex items-center gap-1.5 rounded bg-brand/10 border border-brand/20 px-2.5 py-1 text-brand font-semibold text-xs transition hover:bg-brand hover:text-white whitespace-nowrap shrink-0"
             title="Submit experiment results for academic assessment"
           >
             <Send className="h-3 w-3" />
@@ -234,20 +222,10 @@ export const TopBar: React.FC<TopBarProps> = ({
           </button>
           <button
             type="button"
-            data-testid="btn-export-py"
-            onClick={handleExportPy}
-            className="flex items-center gap-1 rounded border border-line-strong bg-surface-2 px-2 py-1 text-fg text-xs transition hover:bg-hover"
-            title="Export .py script"
-          >
-            <Download className="h-3 w-3" />
-            <span>.py</span>
-          </button>
-          <button
-            type="button"
             data-testid="btn-export-json"
             onClick={handleExportJson}
-            className="flex items-center gap-1 rounded border border-line-strong bg-surface-2 px-2 py-1 text-fg text-xs transition hover:bg-hover"
-            title="Export workspace .json"
+            className="flex items-center gap-1 rounded border border-line-strong bg-surface-2 px-2 py-1 text-fg text-xs transition hover:bg-hover whitespace-nowrap shrink-0"
+            title="Export circuit & observations .json"
           >
             <Download className="h-3 w-3" />
             <span>.json</span>

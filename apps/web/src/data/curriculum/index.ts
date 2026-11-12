@@ -1,23 +1,20 @@
 import { type ExperimentDefinition, ExperimentSchema } from "@vlab/shared";
-import { SS_EXPERIMENTS } from "./ss.js";
-import { NT_EXPERIMENTS } from "./nt.js";
-import { DSP_EXPERIMENTS } from "./dsp.js";
-import { DIP_EXPERIMENTS } from "./dip.js";
-import { BEE_EXPERIMENTS } from "./bee.js";
-import { ACS_EXPERIMENTS } from "./acs.js";
-import { SSP_EXPERIMENTS } from "./ssp.js";
+import { IIT_ISM_NT_EXPERIMENTS, IIT_ISM_ELC_EXPERIMENTS } from "./nt.js";
+import { IIT_ISM_BEE_EXPERIMENTS } from "./bee.js";
 
+// Active catalog: 4 IIT (ISM) Dhanbad Virtual Lab experiments
+// 1. NT-01:  R-L-C Circuit Analysis
+// 2. BEE-01: Ohm's Law & V-I Characteristics
+// 3. ELC-01: RC Low-Pass Filter
+// 4. ELC-02: Zener Diode Characteristics
+// All 51 previous curriculum experiments are preserved in archive/legacy-curriculum/.
 export const ALL_EXPERIMENTS: ExperimentDefinition[] = [
-  ...SS_EXPERIMENTS,
-  ...NT_EXPERIMENTS,
-  ...DSP_EXPERIMENTS,
-  ...DIP_EXPERIMENTS,
-  ...BEE_EXPERIMENTS,
-  ...ACS_EXPERIMENTS,
-  ...SSP_EXPERIMENTS,
+  IIT_ISM_NT_EXPERIMENTS[0]!, // 1st: R-L-C Circuit Analysis
+  IIT_ISM_BEE_EXPERIMENTS[0]!, // 2nd: Ohm's Law
+  IIT_ISM_ELC_EXPERIMENTS[0]!, // 3rd: RC Low-Pass Filter
+  IIT_ISM_ELC_EXPERIMENTS[1]!, // 4th: Zener Diode Characteristics
 ];
 
-// Validate all experiments at load time against the schema
 export const VALIDATED_EXPERIMENTS: ExperimentDefinition[] = ALL_EXPERIMENTS.map((exp) => {
   const parsed = ExperimentSchema.safeParse(exp);
   if (!parsed.success) {

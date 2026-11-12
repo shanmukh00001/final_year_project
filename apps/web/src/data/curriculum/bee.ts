@@ -1,223 +1,173 @@
 import { type ExperimentDefinition } from "@vlab/shared";
 
-export const BEE_EXPERIMENTS: ExperimentDefinition[] = [
+export const IIT_ISM_BEE_EXPERIMENTS: ExperimentDefinition[] = [
   {
     id: "BEE-01",
-    title: "PN-Junction Diode I-V Characteristics",
+    title: "Ohm's Law & V-I Characteristics",
     course: "BEE",
     level: "UG",
+    institute: "IIT (ISM) Dhanbad",
+    labName: "Electrical Engineering Virtual Laboratory",
+    sourceUrl: "https://www.vlab.co.in/",
+    imageUrl: "/images/ohms-law-bench.jpg",
     objective:
-      "Simulate forward and reverse bias I-V characteristics of a PN junction diode using the Shockley equation.",
-    theory:
-      "Shockley equation: $I = I_s (e^{V_D / (\\eta V_T)} - 1)$, where $V_T \\approx 26\\text{ mV}$ at room temperature.",
-    starterCode: `# BEE-01: PN Diode Characteristics
-import numpy as np
-import vlab
+      "Verify Ohm's Law (V = I × R) by building the DC circuit, setting custom supply voltage and resistance values, recording V-I readings, and comparing Single, Series, Parallel, and Non-Ohmic Diode behaviors.",
+    aimDetails: [
+      "Understand and verify Ohm's Law: current through a conductor is directly proportional to applied potential difference at constant temperature.",
+      "Construct the DC circuit using a DC Supply, Switch, Series Ammeter, Load Resistor(s), and Parallel Voltmeter.",
+      "Investigate equivalent resistance and V-I linearity in Single Resistor, Series (R₁ + R₂), and Parallel (R₁ ∥ R₂) configurations.",
+      "Contrast ohmic resistors against a non-ohmic Silicon PN Diode whose V/I ratio varies non-linearly with applied voltage.",
+    ],
+    apparatus: [
+      "Variable DC Power Supply (0 – 50 V)",
+      "Control Switch (S)",
+      "DC Ammeter connected in series",
+      "DC Voltmeter connected in parallel across the load",
+      "User-configurable Resistors R₁ and R₂ (1 Ω – 100 kΩ)",
+      "Silicon PN Junction Diode (for Non-Ohmic comparison)",
+    ],
+    theory: `### What is Ohm's Law? (Clear Explanation)
+**Ohm's Law**, formulated by Georg Simon Ohm, states that the electric current ($I$) flowing through a metallic conductor between two points is **directly proportional** to the voltage ($V$) applied across those two points, provided physical conditions such as temperature remain constant:
 
-Is = 1e-12 # 1 pA saturation current
-Vt = 0.026 # 26 mV thermal voltage
-eta = 1.0
+$$V = I \\times R \\quad \\Longleftrightarrow \\quad I = \\frac{V}{R} \\quad \\Longleftrightarrow \\quad R = \\frac{V}{I}$$
 
-v_d = np.linspace(0, 0.8, 200)
-i_d = Is * (np.exp(v_d / (eta * Vt)) - 1)
+Where:
+- **$V$ (Voltage / Potential Difference)** in Volts ($\\text{V}$) — the electrical "push" driving charge around the circuit.
+- **$I$ (Current)** in Amperes ($\\text{A}$) or milliamperes ($\\text{mA}$) — the rate of flow of electric charge.
+- **$R$ (Resistance)** in Ohms ($\\Omega$) — the opposition offered to current flow.
 
-vlab.plot(v_d, i_d * 1e3, label="Diode Current (mA)", title="Forward PN Diode I-V Curve")
-print(f"Current at Vd=0.7V: {Is * (np.exp(0.7 / (eta * Vt)) - 1) * 1e3:.2f} mA")
-`,
-    parameters: [],
-    expectedOutputs: [{ kind: "plot", name: "Forward PN Diode I-V Curve" }],
-    requiredPackages: ["numpy", "scipy"],
-    estimatedRuntimeMs: 300,
-    matlabNotes: "exp() -> np.exp()",
-    enabled: true,
-  },
-  {
-    id: "BEE-02",
-    title: "Rectifiers and Filter Ripple Factor",
-    course: "BEE",
-    level: "UG",
-    objective:
-      "Analyze half-wave and full-wave bridge rectifier waveforms and calculate ripple factor with filter capacitors.",
-    theory:
-      "Ripple factor $\\gamma = \\frac{V_{ac,rms}}{V_{dc}} = \\frac{1}{2\\sqrt{3} f R_L C}$ for full-wave rectifiers.",
-    starterCode: `# BEE-02: Full-Wave Rectifier
-import numpy as np
-import vlab
+### Why Does the V–I Graph Form a Straight Line?
+Because $R$ is constant for an ohmic resistor, doubling the voltage $V$ **doubles** the current $I$. Plotting $I$ on the vertical axis against $V$ on the horizontal axis produces a straight line passing through the origin $(0,0)$ with constant slope $\\frac{\\Delta I}{\\Delta V} = \\frac{1}{R}$.
 
-t = np.linspace(0, 0.04, 1000)
-v_in = 12.0 * np.sin(2 * np.pi * 50 * t)
-v_rect = np.abs(v_in)
-
-vlab.plot(t, v_rect, label="|Vin|", title="Full-Wave Rectified Output")
-print(f"DC voltage of full-wave rectified signal: {2 * 12.0 / np.pi:.2f} V")
-`,
-    parameters: [],
-    expectedOutputs: [{ kind: "plot", name: "Full-Wave Rectified Output" }],
-    requiredPackages: ["numpy", "scipy"],
-    estimatedRuntimeMs: 300,
-    matlabNotes: "abs(sin()) -> np.abs(np.sin())",
-    enabled: true,
-  },
-  {
-    id: "BEE-03",
-    title: "Zener Diode Voltage Regulator",
-    course: "BEE",
-    level: "UG",
-    objective: "Evaluate line and load regulation of a Zener diode voltage regulator circuit.",
-    theory:
-      "In breakdown, the Zener diode maintains an almost constant voltage $V_Z$ across varying supply voltages and load currents.",
-    starterCode: `# BEE-03: Zener Voltage Regulator
-import numpy as np
-import vlab
-
-Vz = 5.1 # 5.1V Zener
-R_series = 220.0
-v_in = np.linspace(0, 15, 100)
-
-v_out = np.where(v_in > Vz, Vz, v_in)
-
-vlab.plot(v_in, v_out, label="V_out vs V_in", title="Zener Line Regulation Curve")
-print(f"Regulated voltage clamped at {Vz} V")
-`,
-    parameters: [],
-    expectedOutputs: [{ kind: "plot", name: "Zener Line Regulation Curve" }],
-    requiredPackages: ["numpy", "scipy"],
-    estimatedRuntimeMs: 300,
-    matlabNotes: "where() -> np.where()",
-    enabled: true,
-  },
-  {
-    id: "BEE-04",
-    title: "BJT Characteristics and Q-Point",
-    course: "BEE",
-    level: "UG",
-    objective:
-      "Plot common-emitter output characteristics ($I_C$ vs $V_{CE}$) and locate the DC operating Q-point.",
-    theory:
-      "$I_C = \\beta I_B$ in the active region; DC load line equation is $V_{CE} = V_{CC} - I_C R_C$.",
-    starterCode: `# BEE-04: BJT Common-Emitter Characteristics
-import numpy as np
-import vlab
-
-beta = 100.0
-Vce = np.linspace(0, 10, 200)
-
-# Families of curves for Ib = 10uA, 20uA, 30uA, 40uA
-Ib_list = [10e-6, 20e-6, 30e-6, 40e-6]
-Ic_curves = []
-
-for Ib in Ib_list:
-    Ic = beta * Ib * (1 - np.exp(-Vce / 0.3))
-    Ic_curves.append(Ic * 1e3)
-
-vlab.plot(Vce, Ic_curves[-1], label="Ib = 40 uA", title="BJT Output Characteristics")
-print(f"Computed BJT curves for beta={beta}")
-`,
-    parameters: [],
-    expectedOutputs: [{ kind: "plot", name: "BJT Output Characteristics" }],
-    requiredPackages: ["numpy", "scipy"],
-    estimatedRuntimeMs: 350,
-    matlabNotes: "For-loop plotting -> multiple series in vlab",
-    enabled: true,
-  },
-  {
-    id: "BEE-05",
-    title: "Operational Amplifier (Op-Amp) Configurations",
-    course: "BEE",
-    level: "UG",
-    objective: "Simulate inverting, non-inverting, integrator, and differentiator op-amp circuits.",
-    theory:
-      "Ideal inverting amplifier closed-loop gain $A_v = -\\frac{R_f}{R_1}$; non-inverting gain $A_v = 1 + \\frac{R_f}{R_1}$.",
-    starterCode: `# BEE-05: Inverting Op-Amp
-import numpy as np
-import vlab
-
-Rf = vlab.param("Rf", 10.0, 1.0, 50.0, 1.0, label="Feedback Rf (kOhms)")
-R1 = 2.0 # 2 kOhm
-Gain = -Rf / R1
-
-t = np.linspace(0, 0.01, 500)
-v_in = 1.0 * np.sin(2 * np.pi * 500 * t)
-v_out = Gain * v_in
-
-vlab.plot(t, v_out, label=f"Gain={Gain:.1f}", title="Inverting Op-Amp Output")
-print(f"Closed-loop Voltage Gain: {Gain:.2f}")
-`,
-    parameters: [
+### Four Circuit Modes You Can Build & Simulate:
+1. **Single Resistor (Ohmic):** $R_{eq} = R_1$, so $I = V_{DC} / R_1$.
+2. **Series Resistors ($R_1 + R_2$):** Current has only one path, so $I$ is identical through both resistors and resistances add: $R_{eq} = R_1 + R_2$. Voltage divides as $V_1 = I R_1$ and $V_2 = I R_2$.
+3. **Parallel Resistors ($R_1 \\parallel R_2$):** Both resistors share the same voltage $V_{DC}$, while current splits: $R_{eq} = \\frac{R_1 R_2}{R_1 + R_2}$.
+4. **Non-Ohmic PN Diode:** A semiconductor diode follows the exponential Shockley equation $I = I_s (e^{V_D / (\\eta V_T)} - 1)$ instead of a straight line, demonstrating a **non-ohmic** element where $V/I$ is not constant.`,
+    procedureSteps: [
+      "Inspect the Circuit Maker canvas: verify that the DC Source (Vdc), Switch (S), Ammeter (A), Resistor(s), and Parallel Voltmeter (V) are properly wired. You can click 'Clear Wires' to practice wiring terminals yourself and press 'Check Connections'.",
+      "Choose your Circuit Mode ('Single Resistor', 'Series Resistors', 'Parallel Resistors', or 'Non-Ohmic Diode') in the left Circuit Controls panel.",
+      "Set your own custom values for DC Voltage (Vdc) and Resistance (R₁, R₂) using the number inputs or sliders.",
+      "Ensure Switch S is ON and click 'Simulate Circuit' (or enable 'Live Sim ON') to observe live Ammeter, Voltmeter, and Power readings.",
+      "Click 'Add to Table' at several different voltage levels (e.g., 2 V, 5 V, 10 V, 15 V, 20 V) — or use 'Auto-Sweep 5 Points' — to plot your measured points on the V-I Characteristic graph and confirm linearity.",
+    ],
+    pretest: [
       {
-        name: "Rf",
-        kind: "slider",
-        default: 10.0,
-        min: 1.0,
-        max: 50.0,
-        step: 1.0,
-        label: "Feedback Rf (kOhms)",
+        id: "ohm-pre-1",
+        question:
+          "How must an Ammeter and Voltmeter be connected to verify Ohm's Law across a resistor R?",
+        options: [
+          "Ammeter in series with R, and Voltmeter in parallel across R",
+          "Ammeter in parallel across R, and Voltmeter in series with R",
+          "Both Ammeter and Voltmeter in series with R",
+          "Both Ammeter and Voltmeter in parallel across the DC source",
+        ],
+        correctIndex: 0,
+        explanation:
+          "An ammeter has very low resistance and must be in series to measure loop current, while a voltmeter has very high resistance and must be in parallel across the component to measure potential difference.",
+      },
+      {
+        id: "ohm-pre-2",
+        question:
+          "If Vdc = 12 V and R₁ = 1000 Ω (1 kΩ), what current flows through the single resistor?",
+        options: ["120 mA", "12 mA", "1.2 mA", "83.3 mA"],
+        correctIndex: 1,
+        explanation: "By Ohm's Law, I = V / R = 12 V / 1000 Ω = 0.012 A = 12 mA.",
+      },
+      {
+        id: "ohm-pre-3",
+        question:
+          "For two resistors R₁ = 100 Ω and R₂ = 100 Ω connected in parallel, the equivalent resistance Req is:",
+        options: ["200 Ω", "100 Ω", "50 Ω", "25 Ω"],
+        correctIndex: 2,
+        explanation: "In parallel, Req = (R₁ × R₂) / (R₁ + R₂) = (100 × 100) / 200 = 50 Ω.",
       },
     ],
-    expectedOutputs: [{ kind: "plot", name: "Inverting Op-Amp Output" }],
+    posttest: [
+      {
+        id: "ohm-post-1",
+        question:
+          "If you double the supply voltage across a fixed ohmic resistor from 5 V to 10 V, what happens to power P = V·I?",
+        options: [
+          "Power stays the same",
+          "Power doubles (2×)",
+          "Power quadruples (4×)",
+          "Power halves (0.5×)",
+        ],
+        correctIndex: 2,
+        explanation: "Because I also doubles when V doubles, P = V² / R increases by 2² = 4×.",
+      },
+      {
+        id: "ohm-post-2",
+        question: "Why does the Silicon PN Diode fail to satisfy Ohm's Law?",
+        options: [
+          "Its resistance increases linearly with voltage",
+          "Its current rises exponentially with voltage above ~0.6 V, giving a curved non-linear I-V plot",
+          "It allows current equally in both directions",
+          "Its voltage drop is always zero",
+        ],
+        correctIndex: 1,
+        explanation:
+          "A PN junction diode obeys the exponential Shockley diode equation rather than a constant V/I ratio, making it non-ohmic.",
+      },
+    ],
+    references: [
+      "IIT (ISM) Dhanbad Virtual Labs — Basic Electronics & Electrical Engineering Lab",
+      "Boylestad, R. L., 'Introductory Circuit Analysis', Pearson Education.",
+      "Alexander, C. K., & Sadiku, M. N. O., 'Fundamentals of Electric Circuits', McGraw-Hill.",
+    ],
+    starterCode: "# Circuit simulation runs via interactive Circuit Maker",
+    parameters: [
+      {
+        name: "mode",
+        kind: "select",
+        default: "single",
+        label: "Circuit Configuration",
+        options: ["single", "series", "parallel", "diode"],
+      },
+      {
+        name: "Vdc",
+        kind: "slider",
+        default: 10,
+        min: 0,
+        max: 50,
+        step: 0.5,
+        label: "DC Supply Voltage (Vdc)",
+        unit: "V",
+      },
+      {
+        name: "R1",
+        kind: "number",
+        default: 1000,
+        min: 10,
+        max: 50000,
+        step: 10,
+        label: "Primary Resistance (R₁)",
+        unit: "Ω",
+      },
+      {
+        name: "R2",
+        kind: "number",
+        default: 2000,
+        min: 10,
+        max: 50000,
+        step: 10,
+        label: "Secondary Resistance (R₂)",
+        unit: "Ω",
+      },
+      {
+        name: "switchClosed",
+        kind: "toggle",
+        default: true,
+        label: "Control Switch (S)",
+      },
+    ],
+    expectedOutputs: [
+      { kind: "plot", name: "Ohm's Law V-I Characteristic" },
+      { kind: "plot", name: "Power Dissipation P vs V" },
+    ],
     requiredPackages: ["numpy", "scipy"],
-    estimatedRuntimeMs: 300,
-    matlabNotes: "Scalar multiplication Gain * v_in",
-    enabled: true,
-  },
-  {
-    id: "BEE-06",
-    title: "Logic Gates and Truth Tables",
-    course: "BEE",
-    level: "UG",
-    objective: "Verify truth tables of basic (AND, OR, NOT) and universal (NAND, NOR) logic gates.",
-    theory: "Universal gates (NAND, NOR) can realize all boolean functions by combination.",
-    starterCode: `# BEE-06: Logic Gates & Truth Table
-import numpy as np
-import vlab
-
-A = np.array([0, 0, 1, 1], dtype=bool)
-B = np.array([0, 1, 0, 1], dtype=bool)
-
-AND_out = A & B
-OR_out = A | B
-NAND_out = ~(A & B)
-XOR_out = A ^ B
-
-vlab.plot(np.arange(4), XOR_out.astype(float), label="XOR Output", title="Logic Gate Truth Table Profile")
-print(f"Inputs:\nA: {A.astype(int)}\nB: {B.astype(int)}\nXOR: {XOR_out.astype(int)}")
-`,
-    parameters: [],
-    expectedOutputs: [{ kind: "plot", name: "Logic Gate Truth Table Profile" }],
-    requiredPackages: ["numpy", "scipy"],
-    estimatedRuntimeMs: 250,
-    matlabNotes: "Bitwise logic & | ~ ^ in numpy",
-    enabled: true,
-  },
-  {
-    id: "BEE-07",
-    title: "RC High-Pass and Low-Pass Filters",
-    course: "BEE",
-    level: "UG",
-    objective: "Demonstrate filtering and phase shift of RC networks over audio frequency ranges.",
-    theory:
-      "Cutoff frequency is given by $f_c = \\frac{1}{2\\pi R C}$ where output drops to $\\frac{1}{\\sqrt{2}} \\approx 0.707$ of input.",
-    starterCode: `# BEE-07: RC Filter Frequency Response
-import numpy as np
-import vlab
-
-R = 1000.0 # 1 kOhm
-C = 0.1e-6 # 0.1 uF
-fc = 1 / (2 * np.pi * R * C)
-
-f = np.logspace(1, 5, 200)
-w = 2 * np.pi * f
-H_lowpass = 1 / (1 + 1j * w * R * C)
-mag_db = 20 * np.log10(np.abs(H_lowpass))
-
-vlab.plot(f, mag_db, label="Low-Pass Response (dB)", title="RC Filter Frequency Response")
-print(f"Filter Cutoff Frequency: {fc:.1f} Hz")
-`,
-    parameters: [],
-    expectedOutputs: [{ kind: "plot", name: "RC Filter Frequency Response" }],
-    requiredPackages: ["numpy", "scipy"],
-    estimatedRuntimeMs: 300,
-    matlabNotes: "semilogx() -> log-scaled axis in vlab",
+    estimatedRuntimeMs: 5,
     enabled: true,
   },
 ];

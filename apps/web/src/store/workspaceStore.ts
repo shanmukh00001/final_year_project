@@ -5,13 +5,19 @@ import {
   type ParamDecl,
   type ParamValue,
   type PyError,
-  type WorkerToMain,
   MAX_CONSOLE_LINES,
 } from "@vlab/shared";
-import { WorkerManager } from "../engine/WorkerManager.js";
 import { saveLocalDraft, getLocalDraft, getLocalDraftSync } from "../lib/idb/drafts.js";
-
 import { getExperimentById } from "../data/curriculum/index.js";
+import { buildBlueprint } from "../engine/circuitBlueprints.js";
+import { simulateCircuit, validateCircuitConnections } from "../engine/circuitSolver.js";
+import {
+  type CircuitComponent,
+  type CircuitSimulationResult,
+  type CircuitWire,
+  type ObservationRow,
+  type TerminalRef,
+} from "../engine/circuitTypes.js";
 
 export type EngineStatus =
   | "uninitialized"
@@ -20,6 +26,10 @@ export type EngineStatus =
   | "running"
   | "cancelling"
   | "error";
+
+export type VlabSectionTab = "simulation" | "aim" | "theory" | "procedure" | "pretest" | "posttest";
+
+export type CircuitTool = "select" | "wire" | "delete_wire";
 
 export interface ConsoleLine {
   id: string;
@@ -43,13 +53,22 @@ export interface WorkspaceState {
   activeError: PyError | null;
   lastRunElapsedMs: number | null;
   unsavedChanges: boolean;
-  /** Populated from ENGINE_READY — reflects the actual running Python / package versions. */
   engineRuntimeInfo: {
     pythonVersion: string;
     pyodideVersion: string;
     numpy: string;
     scipy: string;
   } | null;
+
+  // Circuit Maker & Simulation state
+  activeVlabTab: VlabSectionTab;
+  activeTool: CircuitTool;
+  selectedComponentId: string | null;
+  pendingTerminal: TerminalRef | null;
+  components: CircuitComponent[];
+  wires: CircuitWire[];
+  simulation: CircuitSimulationResult | null;
+  observationRows: ObservationRow[];
 
   // Actions
   initWorkspace: (experimentId: string, initialCode?: string) => void;
@@ -58,6 +77,7 @@ export interface WorkspaceState {
   saveCurrentDraft: () => void;
   setLiveRun: (enabled: boolean) => void;
   setParamValue: (name: string, value: ParamValue) => void;
+  resetParamsToDefault: () => void;
   runCode: () => void;
   stopExecution: () => void;
   restartKernel: () => void;
@@ -65,11 +85,42 @@ export interface WorkspaceState {
   setActiveFigure: (id: string) => void;
   exportCode: () => string;
   exportWorkspaceJson: () => string;
+
+  // Circuit Maker actions
+  setActiveVlabTab: (tab: VlabSectionTab) => void;
+  setActiveTool: (tool: CircuitTool) => void;
+  setSelectedComponent: (compId: string | null) => void;
+  moveComponent: (compId: string, x: number, y: number) => void;
+  toggleComponentPresent: (compId: string) => void;
+  clickTerminal: (ref: TerminalRef) => void;
+  deleteWire: (wireId: string) => void;
+  autoWireCircuit: () => void;
+  clearAllWires: () => void;
+  checkConnections: () => void;
+  simulate: () => void;
+  recordObservation: () => void;
+  autoSweepObservations: () => void;
+  clearObservations: () => void;
 }
 
-let workerManagerInstance: WorkerManager | null = null;
 let autosaveTimeout: ReturnType<typeof setTimeout> | null = null;
 let liveRunDebounceTimeout: ReturnType<typeof setTimeout> | null = null;
+
+function buildDeclaredParamsMap(expId: string): {
+  declared: Record<string, ParamDecl>;
+  defaults: Record<string, ParamValue>;
+} {
+  const exp = getExperimentById(expId);
+  const declared: Record<string, ParamDecl> = {};
+  const defaults: Record<string, ParamValue> = {};
+  if (exp?.parameters) {
+    for (const p of exp.parameters) {
+      declared[p.name] = p;
+      defaults[p.name] = p.default;
+    }
+  }
+  return { declared, defaults };
+}
 
 function getInitialActiveExperimentId(): string {
   try {
@@ -87,80 +138,91 @@ function getInitialActiveExperimentId(): string {
   } catch {
     // Ignore storage errors
   }
-  return "DSP-03";
+  return "NT-01";
+}
+
+function computeInitialState(expId: string) {
+  const exp = getExperimentById(expId);
+  const syncDraft = getLocalDraftSync(expId);
+  const { declared, defaults } = buildDeclaredParamsMap(expId);
+  const params: Record<string, ParamValue> = syncDraft
+    ? { ...defaults, ...(syncDraft.params as Record<string, ParamValue>) }
+    : defaults;
+  const mode = typeof params["mode"] === "string" ? params["mode"] : undefined;
+  const bp = buildBlueprint(expId, mode);
+  const sim = simulateCircuit(expId, params, bp.components, bp.defaultWires, []);
+
+  return {
+    exp,
+    declared,
+    params,
+    bp,
+    sim,
+  };
 }
 
 const initialBootExpId = getInitialActiveExperimentId();
-const initialBootExp = getExperimentById(initialBootExpId);
-const initialBootDraft = getLocalDraftSync(initialBootExpId);
-const initialBootCode = initialBootDraft
-  ? initialBootDraft.code
-  : initialBootExp?.starterCode || `# Experiment ${initialBootExpId}`;
-const initialBootParams: Record<string, ParamValue> = initialBootDraft
-  ? (initialBootDraft.params as Record<string, ParamValue>)
-  : {};
-
-if (initialBootExp && initialBootExp.parameters && !initialBootDraft) {
-  for (const p of initialBootExp.parameters) {
-    initialBootParams[p.name] = p.default;
-  }
-}
+const bootData = computeInitialState(initialBootExpId);
 
 export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   experimentId: initialBootExpId,
-  code: initialBootCode,
-  engineStatus: "uninitialized",
-  bootProgress: { percent: 0, stage: "", message: "" },
-  consoleLines: [],
-  variables: [],
-  figures: [],
-  activeFigureId: null,
-  params: initialBootParams,
-  declaredParams: {},
-  liveRun: false,
+  code: bootData.exp?.starterCode || `# ${initialBootExpId}`,
+  engineStatus: "ready",
+  bootProgress: { percent: 100, stage: "ready", message: "Circuit Simulator Ready" },
+  consoleLines: [
+    {
+      id: "boot-ready",
+      stream: "system",
+      text: `>>> IIT (ISM) Dhanbad Virtual Lab Circuit Simulator Ready · ${bootData.exp?.title || initialBootExpId}`,
+      timestamp: Date.now(),
+    },
+  ],
+  variables: bootData.sim.variables,
+  figures: bootData.sim.figures,
+  activeFigureId: bootData.sim.figures[0]?.id || null,
+  params: bootData.params,
+  declaredParams: bootData.declared,
+  liveRun: true,
   activeError: null,
-  lastRunElapsedMs: null,
+  lastRunElapsedMs: 1,
   unsavedChanges: false,
   engineRuntimeInfo: null,
 
+  activeVlabTab: "simulation",
+  activeTool: "select",
+  selectedComponentId: null,
+  pendingTerminal: null,
+  components: bootData.bp.components,
+  wires: bootData.bp.defaultWires,
+  simulation: bootData.sim,
+  observationRows: [],
+
   initWorkspace: (experimentId: string, initialCode?: string) => {
-    // Check synchronous draft from localStorage first for instant hydration
-    const syncDraft = getLocalDraftSync(experimentId);
-    const exp = getExperimentById(experimentId);
-    const starter = initialCode || exp?.starterCode || get().code;
-
-    const initialCodeToUse = syncDraft ? syncDraft.code : starter;
-    const initialParams: Record<string, ParamValue> = syncDraft
-      ? (syncDraft.params as Record<string, ParamValue>)
-      : {};
-
-    if (exp && exp.parameters && !syncDraft) {
-      for (const p of exp.parameters) {
-        initialParams[p.name] = p.default;
-      }
-    }
+    const validId = getExperimentById(experimentId) ? experimentId : "NT-01";
+    const data = computeInitialState(validId);
 
     set({
-      experimentId,
-      code: initialCodeToUse,
-      params: initialParams,
-      engineStatus: "booting",
-      consoleLines: [
-        {
-          id: `${Date.now()}-boot`,
-          stream: "system",
-          text: ">>> Initializing V-Lab Simulation Engine...",
-          timestamp: Date.now(),
-        },
-      ],
+      experimentId: validId,
+      code: initialCode || data.exp?.starterCode || "",
+      params: data.params,
+      declaredParams: data.declared,
+      components: data.bp.components,
+      wires: data.bp.defaultWires,
+      simulation: data.sim,
+      figures: data.sim.figures,
+      variables: data.sim.variables,
+      activeFigureId: data.sim.figures[0]?.id || null,
+      engineStatus: "ready",
+      bootProgress: { percent: 100, stage: "ready", message: "Circuit Simulator Ready" },
+      lastRunElapsedMs: 1,
     });
 
     if (typeof window !== "undefined") {
       try {
-        localStorage.setItem("vlab_active_experiment", experimentId);
+        localStorage.setItem("vlab_active_experiment", validId);
         const url = new URL(window.location.href);
-        if (url.searchParams.get("exp") !== experimentId) {
-          url.searchParams.set("exp", experimentId);
+        if (url.searchParams.get("exp") !== validId) {
+          url.searchParams.set("exp", validId);
           window.history.replaceState({}, "", url.toString());
         }
       } catch {
@@ -168,213 +230,53 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       }
     }
 
-    // Also double check IndexedDB draft
-    void getLocalDraft(experimentId).then((draft) => {
-      if (draft && draft.experimentId === experimentId && get().experimentId === experimentId) {
+    void getLocalDraft(validId).then((draft) => {
+      if (draft && draft.experimentId === validId && get().experimentId === validId) {
+        const mergedParams = {
+          ...data.params,
+          ...(draft.params as Record<string, ParamValue>),
+        };
+        const mode = typeof mergedParams["mode"] === "string" ? mergedParams["mode"] : undefined;
+        const bp = buildBlueprint(validId, mode);
+        const sim = simulateCircuit(validId, mergedParams, bp.components, bp.defaultWires, []);
         set({
-          code: draft.code,
-          params: draft.params as Record<string, ParamValue>,
+          params: mergedParams,
+          components: bp.components,
+          wires: bp.defaultWires,
+          simulation: sim,
+          figures: sim.figures,
+          variables: sim.variables,
+          activeFigureId: sim.figures[0]?.id || null,
         });
       }
     });
-
-    if (!workerManagerInstance) {
-      workerManagerInstance = new WorkerManager();
-
-      workerManagerInstance.onMessage((msg: WorkerToMain) => {
-        const state = get();
-
-        switch (msg.type) {
-          case "ENGINE_PROGRESS":
-            set({
-              bootProgress: {
-                percent: msg.percent,
-                stage: msg.stage,
-                message: msg.message,
-              },
-            });
-            break;
-
-          case "ENGINE_READY": {
-            const numpyVer = msg.packages ? msg.packages["numpy"] : undefined;
-            const scipyVer = msg.packages ? msg.packages["scipy"] : undefined;
-            const sysLine: ConsoleLine = {
-              id: `${Date.now()}-ready`,
-              stream: "system",
-              text: `>>> Engine Ready (Python ${msg.pythonVersion} · NumPy ${numpyVer ?? "?"} · SciPy ${scipyVer ?? "?"})`,
-              timestamp: Date.now(),
-            };
-            set({
-              engineStatus: "ready",
-              engineRuntimeInfo: {
-                pythonVersion: msg.pythonVersion,
-                pyodideVersion: msg.pyodideVersion,
-                numpy: numpyVer ?? "unknown",
-                scipy: scipyVer ?? "unknown",
-              },
-              consoleLines: [...state.consoleLines, sysLine].slice(-MAX_CONSOLE_LINES),
-            });
-            break;
-          }
-
-          case "ENGINE_ERROR": {
-            const errLine: ConsoleLine = {
-              id: `${Date.now()}-err`,
-              stream: "stderr",
-              text: `>>> Engine Error: ${msg.error.message}`,
-              timestamp: Date.now(),
-            };
-            set({
-              engineStatus: "error",
-              activeError: msg.error,
-              consoleLines: [...state.consoleLines, errLine].slice(-MAX_CONSOLE_LINES),
-            });
-            break;
-          }
-
-          case "STREAM_OUTPUT": {
-            const newLine: ConsoleLine = {
-              id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-              stream: msg.stream,
-              text: msg.text,
-              timestamp: Date.now(),
-            };
-            set({
-              consoleLines: [...state.consoleLines, newLine].slice(-MAX_CONSOLE_LINES),
-            });
-            break;
-          }
-
-          case "PARAM_DECLARED": {
-            const existingParam = state.params[msg.param.name];
-            set({
-              declaredParams: {
-                ...state.declaredParams,
-                [msg.param.name]: msg.param,
-              },
-              params: {
-                ...state.params,
-                [msg.param.name]: existingParam !== undefined ? existingParam : msg.param.default,
-              },
-            });
-            break;
-          }
-
-          case "FIGURE_READY": {
-            const existingIdx = state.figures.findIndex((f) => f.id === msg.figure.id);
-            let updatedFigures: FigureSpec[];
-            if (existingIdx >= 0) {
-              updatedFigures = [...state.figures];
-              updatedFigures[existingIdx] = msg.figure;
-            } else {
-              updatedFigures = [...state.figures, msg.figure];
-            }
-            set({
-              figures: updatedFigures,
-              activeFigureId: state.activeFigureId || msg.figure.id,
-            });
-            break;
-          }
-
-          case "VARIABLES_UPDATED":
-            set({
-              variables: msg.variables,
-            });
-            break;
-
-          case "RUN_COMPLETED": {
-            const compLine: ConsoleLine = {
-              id: `${Date.now()}-comp`,
-              stream: "system",
-              text: `>>> Run finished in ${Math.round(msg.elapsedMs)} ms`,
-              timestamp: Date.now(),
-            };
-            set({
-              engineStatus: "ready",
-              lastRunElapsedMs: msg.elapsedMs,
-              activeError: null,
-              consoleLines: [...state.consoleLines, compLine].slice(-MAX_CONSOLE_LINES),
-            });
-            break;
-          }
-
-          case "RUN_FAILED": {
-            const failLine: ConsoleLine = {
-              id: `${Date.now()}-fail`,
-              stream: "stderr",
-              text: `${msg.error.name}: ${msg.error.message}\n${msg.error.traceback}`,
-              timestamp: Date.now(),
-            };
-            set({
-              engineStatus: "ready",
-              lastRunElapsedMs: msg.elapsedMs,
-              activeError: msg.error,
-              consoleLines: [...state.consoleLines, failLine].slice(-MAX_CONSOLE_LINES),
-            });
-            break;
-          }
-
-          case "RUN_CANCELLED": {
-            const cancelLine: ConsoleLine = {
-              id: `${Date.now()}-cancel`,
-              stream: "warning",
-              text: ">>> Execution cancelled.",
-              timestamp: Date.now(),
-            };
-            set({
-              engineStatus: "ready",
-              lastRunElapsedMs: msg.elapsedMs,
-              consoleLines: [...state.consoleLines, cancelLine].slice(-MAX_CONSOLE_LINES),
-            });
-            break;
-          }
-
-          default:
-            break;
-        }
-      });
-    }
-
-    workerManagerInstance.init();
   },
 
   loadExperiment: (id: string) => {
-    // Flush draft for current experiment before switching
     get().saveCurrentDraft();
-
     if (liveRunDebounceTimeout) {
       clearTimeout(liveRunDebounceTimeout);
       liveRunDebounceTimeout = null;
     }
 
-    // Abort an in-progress run so the new experiment starts clean.
-    const { engineStatus } = get();
-    if ((engineStatus === "running" || engineStatus === "cancelling") && workerManagerInstance) {
-      workerManagerInstance.stop();
-    }
-
-    const syncDraft = getLocalDraftSync(id);
-    const exp = getExperimentById(id);
-    const starter = exp ? exp.starterCode : `# Experiment ${id}`;
-    const initialCode = syncDraft ? syncDraft.code : starter;
-    const initialParams: Record<string, ParamValue> = syncDraft
-      ? (syncDraft.params as Record<string, ParamValue>)
-      : {};
-
-    if (exp && exp.parameters && !syncDraft) {
-      for (const p of exp.parameters) {
-        initialParams[p.name] = p.default;
-      }
-    }
+    const validId = getExperimentById(id) ? id : "NT-01";
+    const data = computeInitialState(validId);
 
     set({
-      experimentId: id,
-      code: initialCode,
-      figures: [],
-      variables: [],
-      activeFigureId: null,
-      params: initialParams,
-      declaredParams: {},
+      experimentId: validId,
+      activeVlabTab: "simulation",
+      code: data.exp?.starterCode || "",
+      params: data.params,
+      declaredParams: data.declared,
+      components: data.bp.components,
+      wires: data.bp.defaultWires,
+      simulation: data.sim,
+      figures: data.sim.figures,
+      variables: data.sim.variables,
+      activeFigureId: data.sim.figures[0]?.id || null,
+      observationRows: [],
+      selectedComponentId: null,
+      pendingTerminal: null,
       activeError: null,
       unsavedChanges: false,
       consoleLines: [
@@ -382,7 +284,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
         {
           id: `${Date.now()}-load`,
           stream: "system" as const,
-          text: `>>> Loaded experiment ${id}: ${exp?.title || id}`,
+          text: `>>> Loaded Experiment ${validId}: ${data.exp?.title || validId}`,
           timestamp: Date.now(),
         },
       ].slice(-MAX_CONSOLE_LINES),
@@ -390,39 +292,26 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
 
     if (typeof window !== "undefined") {
       try {
-        localStorage.setItem("vlab_active_experiment", id);
+        localStorage.setItem("vlab_active_experiment", validId);
         const url = new URL(window.location.href);
-        if (url.searchParams.get("exp") !== id) {
-          url.searchParams.set("exp", id);
+        if (url.searchParams.get("exp") !== validId) {
+          url.searchParams.set("exp", validId);
           window.history.replaceState({}, "", url.toString());
         }
       } catch {
         // Ignore storage or history errors
       }
     }
-
-    // Check IndexedDB draft for this experiment — only apply if it matches
-    void getLocalDraft(id).then((draft) => {
-      // Guard: ensure the experiment hasn't changed again since this async call started
-      if (draft && draft.experimentId === id && get().experimentId === id) {
-        set({
-          code: draft.code,
-          params: draft.params as Record<string, ParamValue>,
-        });
-      }
-    });
   },
 
   setCode: (code: string) => {
     set({ code, unsavedChanges: true });
-
-    // Debounced autosave to localStorage and IndexedDB (1s)
     if (autosaveTimeout) {
       clearTimeout(autosaveTimeout);
     }
     autosaveTimeout = setTimeout(() => {
       get().saveCurrentDraft();
-    }, 1000);
+    }, 800);
   },
 
   saveCurrentDraft: () => {
@@ -442,75 +331,81 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
 
   setLiveRun: (enabled: boolean) => {
     set({ liveRun: enabled });
+    if (enabled) {
+      get().simulate();
+    }
   },
 
   setParamValue: (name: string, value: ParamValue) => {
-    const updatedParams = { ...get().params, [name]: value };
-    set({ params: updatedParams });
+    const state = get();
+    const updatedParams = { ...state.params, [name]: value };
 
-    if (get().liveRun) {
-      if (liveRunDebounceTimeout) {
-        clearTimeout(liveRunDebounceTimeout);
+    if (name === "mode") {
+      const bp = buildBlueprint(state.experimentId, String(value));
+      set({
+        params: updatedParams,
+        components: bp.components,
+        wires: bp.defaultWires,
+        pendingTerminal: null,
+        selectedComponentId: null,
+        unsavedChanges: true,
+      });
+      get().simulate();
+    } else {
+      set({ params: updatedParams, unsavedChanges: true });
+      if (state.liveRun) {
+        if (liveRunDebounceTimeout) {
+          clearTimeout(liveRunDebounceTimeout);
+        }
+        liveRunDebounceTimeout = setTimeout(() => {
+          get().runCode();
+        }, 40);
       }
-      liveRunDebounceTimeout = setTimeout(() => {
-        get().runCode();
-      }, 300);
     }
+
+    if (autosaveTimeout) {
+      clearTimeout(autosaveTimeout);
+    }
+    autosaveTimeout = setTimeout(() => {
+      get().saveCurrentDraft();
+    }, 800);
+  },
+
+  resetParamsToDefault: () => {
+    const state = get();
+    const { defaults } = buildDeclaredParamsMap(state.experimentId);
+    const mode = typeof defaults["mode"] === "string" ? defaults["mode"] : undefined;
+    const bp = buildBlueprint(state.experimentId, mode);
+    set({
+      params: defaults,
+      components: bp.components,
+      wires: bp.defaultWires,
+      pendingTerminal: null,
+      unsavedChanges: true,
+    });
+    get().simulate();
   },
 
   runCode: () => {
-    const state = get();
-    if (state.engineStatus === "running") {
-      return;
-    }
-
-    const startLine: ConsoleLine = {
-      id: `${Date.now()}-start`,
-      stream: "system",
-      text: `>>> Running code (${state.experimentId})...`,
-      timestamp: Date.now(),
-    };
-
-    set({
-      engineStatus: "running",
-      activeError: null,
-      declaredParams: {},
-      figures: [],
-      activeFigureId: null,
-      consoleLines: [...state.consoleLines, startLine].slice(-MAX_CONSOLE_LINES),
-    });
-
-    if (workerManagerInstance) {
-      workerManagerInstance.runCode(state.code, state.params);
-    }
+    get().simulate();
   },
 
   stopExecution: () => {
-    if (workerManagerInstance) {
-      set({ engineStatus: "cancelling" });
-      workerManagerInstance.stop();
-    }
+    set({ engineStatus: "ready" });
   },
 
   restartKernel: () => {
-    if (workerManagerInstance) {
-      const restartLine: ConsoleLine = {
-        id: `${Date.now()}-restart`,
-        stream: "system",
-        text: ">>> Restarting Python kernel...",
-        timestamp: Date.now(),
-      };
-      set({
-        engineStatus: "booting",
-        figures: [],
-        variables: [],
-        activeFigureId: null,
-        consoleLines: [...get().consoleLines, restartLine].slice(-MAX_CONSOLE_LINES),
-      });
-      workerManagerInstance.terminate();
-      workerManagerInstance.spawn();
-      workerManagerInstance.init();
-    }
+    get().resetParamsToDefault();
+    set({
+      consoleLines: [
+        {
+          id: `${Date.now()}-reset`,
+          stream: "system",
+          text: ">>> Circuit bench reset to default parameters and connections.",
+          timestamp: Date.now(),
+        },
+      ],
+    });
   },
 
   clearConsole: () => {
@@ -530,13 +425,317 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     return JSON.stringify(
       {
         experimentId: state.experimentId,
-        code: state.code,
         params: state.params,
+        wires: state.wires,
+        observations: state.observationRows,
         exportedAt: new Date().toISOString(),
       },
       null,
       2,
     );
+  },
+
+  setActiveVlabTab: (tab: VlabSectionTab) => set({ activeVlabTab: tab }),
+
+  setActiveTool: (tool: CircuitTool) => set({ activeTool: tool, pendingTerminal: null }),
+
+  setSelectedComponent: (compId: string | null) => set({ selectedComponentId: compId }),
+
+  moveComponent: (compId: string, x: number, y: number) => {
+    const clampedX = Math.max(55, Math.min(745, Math.round(x / 5) * 5));
+    const clampedY = Math.max(55, Math.min(385, Math.round(y / 5) * 5));
+    set((state) => ({
+      components: state.components.map((c) =>
+        c.id === compId ? { ...c, x: clampedX, y: clampedY } : c,
+      ),
+    }));
+  },
+
+  toggleComponentPresent: (compId: string) => {
+    const state = get();
+    const target = state.components.find((c) => c.id === compId);
+    if (!target) {
+      return;
+    }
+    const nextPresent = !target.present;
+    const nextComponents = state.components.map((c) =>
+      c.id === compId ? { ...c, present: nextPresent } : c,
+    );
+    const nextWires = nextPresent
+      ? state.wires
+      : state.wires.filter((w) => w.from.compId !== compId && w.to.compId !== compId);
+
+    set({ components: nextComponents, wires: nextWires });
+    if (state.liveRun) {
+      get().simulate();
+    }
+  },
+
+  clickTerminal: (ref: TerminalRef) => {
+    const state = get();
+    const pending = state.pendingTerminal;
+    if (!pending) {
+      set({ pendingTerminal: ref, activeTool: "wire" });
+      return;
+    }
+    if (pending.compId === ref.compId && pending.terminalId === ref.terminalId) {
+      set({ pendingTerminal: null });
+      return;
+    }
+    if (pending.compId === ref.compId) {
+      // Do not allow shorting a component to itself via single click unless intentional; switch pending
+      set({ pendingTerminal: ref });
+      return;
+    }
+    const alreadyExists = state.wires.some(
+      (w) =>
+        (w.from.compId === pending.compId &&
+          w.from.terminalId === pending.terminalId &&
+          w.to.compId === ref.compId &&
+          w.to.terminalId === ref.terminalId) ||
+        (w.to.compId === pending.compId &&
+          w.to.terminalId === pending.terminalId &&
+          w.from.compId === ref.compId &&
+          w.from.terminalId === ref.terminalId),
+    );
+    if (alreadyExists) {
+      set({ pendingTerminal: null });
+      return;
+    }
+    const newWire: CircuitWire = {
+      id: `w-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      from: pending,
+      to: ref,
+    };
+    const nextWires = [...state.wires, newWire];
+    set({ wires: nextWires, pendingTerminal: null });
+    if (state.liveRun) {
+      get().simulate();
+    }
+  },
+
+  deleteWire: (wireId: string) => {
+    const state = get();
+    const nextWires = state.wires.filter((w) => w.id !== wireId);
+    set({ wires: nextWires });
+    if (state.liveRun) {
+      get().simulate();
+    }
+  },
+
+  autoWireCircuit: () => {
+    const state = get();
+    const mode = typeof state.params["mode"] === "string" ? state.params["mode"] : undefined;
+    const bp = buildBlueprint(state.experimentId, mode);
+    set({
+      components: bp.components,
+      wires: bp.defaultWires,
+      pendingTerminal: null,
+      consoleLines: [
+        ...state.consoleLines,
+        {
+          id: `${Date.now()}-autowire`,
+          stream: "system" as const,
+          text: ">>> Auto-wired standard IIT (ISM) Dhanbad circuit schematic.",
+          timestamp: Date.now(),
+        },
+      ].slice(-MAX_CONSOLE_LINES),
+    });
+    get().simulate();
+  },
+
+  clearAllWires: () => {
+    const state = get();
+    set({
+      wires: [],
+      pendingTerminal: null,
+      consoleLines: [
+        ...state.consoleLines,
+        {
+          id: `${Date.now()}-clearwires`,
+          stream: "warning" as const,
+          text: ">>> Cleared all wires. Click component terminals in Wire mode to connect the circuit, or click Auto-Wire.",
+          timestamp: Date.now(),
+        },
+      ].slice(-MAX_CONSOLE_LINES),
+    });
+    get().simulate();
+  },
+
+  checkConnections: () => {
+    const state = get();
+    const check = validateCircuitConnections(
+      state.experimentId,
+      state.params,
+      state.components,
+      state.wires,
+    );
+    const line: ConsoleLine = {
+      id: `${Date.now()}-chk`,
+      stream: check.valid ? "system" : "stderr",
+      text: `>>> Check Connections [${check.title}]: ${check.message}`,
+      timestamp: Date.now(),
+    };
+    set({
+      consoleLines: [...state.consoleLines, line].slice(-MAX_CONSOLE_LINES),
+    });
+    get().simulate();
+  },
+
+  simulate: () => {
+    const t0 = typeof performance !== "undefined" ? performance.now() : Date.now();
+    const state = get();
+    const sim = simulateCircuit(
+      state.experimentId,
+      state.params,
+      state.components,
+      state.wires,
+      state.observationRows,
+    );
+    const t1 = typeof performance !== "undefined" ? performance.now() : Date.now();
+    const elapsedMs = Math.max(1, t1 - t0);
+
+    const activeFigValid = sim.figures.some((f) => f.id === state.activeFigureId);
+    const nextFigId = activeFigValid ? state.activeFigureId : sim.figures[0]?.id || null;
+
+    set({
+      simulation: sim,
+      figures: sim.figures,
+      variables: sim.variables,
+      activeFigureId: nextFigId,
+      lastRunElapsedMs: elapsedMs,
+      engineStatus: "ready",
+    });
+  },
+
+  recordObservation: () => {
+    const state = get();
+    const sim =
+      state.simulation ||
+      simulateCircuit(
+        state.experimentId,
+        state.params,
+        state.components,
+        state.wires,
+        state.observationRows,
+      );
+    if (!sim.energized) {
+      set({
+        consoleLines: [
+          ...state.consoleLines,
+          {
+            id: `${Date.now()}-obs-err`,
+            stream: "warning" as const,
+            text: ">>> Cannot record reading: verify circuit connections and close Switch first.",
+            timestamp: Date.now(),
+          },
+        ].slice(-MAX_CONSOLE_LINES),
+      });
+      return;
+    }
+    const row: ObservationRow = {
+      id: `obs-${Date.now()}-${state.observationRows.length + 1}`,
+      timestamp: Date.now(),
+      experimentId: state.experimentId,
+      mode: String(state.params["mode"] || "default"),
+      values: sim.observationSnapshot,
+    };
+    const nextRows = [...state.observationRows, row];
+    set({
+      observationRows: nextRows,
+      consoleLines: [
+        ...state.consoleLines,
+        {
+          id: `${Date.now()}-obs-ok`,
+          stream: "stdout" as const,
+          text: `>>> Recorded Trial #${nextRows.length}: ${Object.entries(row.values)
+            .map(([k, v]) => `${k}=${v}`)
+            .join(", ")}`,
+          timestamp: Date.now(),
+        },
+      ].slice(-MAX_CONSOLE_LINES),
+    });
+    get().simulate();
+  },
+
+  autoSweepObservations: () => {
+    const state = get();
+    const rows: ObservationRow[] = [];
+    if (state.experimentId === "BEE-01") {
+      const voltages = [2, 5, 10, 15, 20];
+      for (let i = 0; i < voltages.length; i++) {
+        const v = voltages[i]!;
+        const p: Record<string, ParamValue> = { ...state.params, Vdc: v, switchClosed: true };
+        const s = simulateCircuit(state.experimentId, p, state.components, state.wires, []);
+        if (s.energized) {
+          rows.push({
+            id: `sweep-${Date.now()}-${i}`,
+            timestamp: Date.now() + i,
+            experimentId: state.experimentId,
+            mode: String(p["mode"] || "single"),
+            values: s.observationSnapshot,
+          });
+        }
+      }
+    } else if (state.experimentId === "NT-01") {
+      const caps = [20, 35, 55, 80, 140];
+      for (let i = 0; i < caps.length; i++) {
+        const c = caps[i]!;
+        const p: Record<string, ParamValue> = { ...state.params, C: c, switchClosed: true };
+        const s = simulateCircuit(state.experimentId, p, state.components, state.wires, []);
+        if (s.energized) {
+          rows.push({
+            id: `sweep-${Date.now()}-${i}`,
+            timestamp: Date.now() + i,
+            experimentId: state.experimentId,
+            mode: String(p["mode"] || "RLC"),
+            values: s.observationSnapshot,
+          });
+        }
+      }
+    } else if (state.experimentId === "ELC-01") {
+      const freqs = [20, 100, 160, 500, 2000];
+      for (let i = 0; i < freqs.length; i++) {
+        const freq = freqs[i]!;
+        const p: Record<string, ParamValue> = { ...state.params, f: freq };
+        const s = simulateCircuit(state.experimentId, p, state.components, state.wires, []);
+        if (s.energized) {
+          rows.push({
+            id: `sweep-${Date.now()}-${i}`,
+            timestamp: Date.now() + i,
+            experimentId: state.experimentId,
+            mode: String(p["mode"] || "rc_filter"),
+            values: s.observationSnapshot,
+          });
+        }
+      }
+    } else {
+      const voltages = [2, 4, 6, 10, 15];
+      for (let i = 0; i < voltages.length; i++) {
+        const v = voltages[i]!;
+        const p: Record<string, ParamValue> = { ...state.params, Vs: v };
+        const s = simulateCircuit(state.experimentId, p, state.components, state.wires, []);
+        if (s.energized) {
+          rows.push({
+            id: `sweep-${Date.now()}-${i}`,
+            timestamp: Date.now() + i,
+            experimentId: state.experimentId,
+            mode: String(p["mode"] || "zener"),
+            values: s.observationSnapshot,
+          });
+        }
+      }
+    }
+
+    if (rows.length > 0) {
+      set({ observationRows: [...state.observationRows, ...rows] });
+      get().simulate();
+    }
+  },
+
+  clearObservations: () => {
+    set({ observationRows: [] });
+    get().simulate();
   },
 }));
 

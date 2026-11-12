@@ -1,60 +1,50 @@
-import React from "react";
+import { Activity, Cpu } from "lucide-react";
 import { useWorkspaceStore } from "../../store/workspaceStore.js";
 
-interface StatusBarProps {
-  cursorPosition?: { lineNumber: number; column: number };
-}
+export function StatusBar() {
+  const { experimentId, activeTool, wires, simulation, lastRunElapsedMs, unsavedChanges } =
+    useWorkspaceStore();
 
-export const StatusBar: React.FC<StatusBarProps> = ({
-  cursorPosition = { lineNumber: 1, column: 1 },
-}) => {
-  const { engineStatus, unsavedChanges, lastRunElapsedMs } = useWorkspaceStore();
+  const conn = simulation?.connection;
 
   return (
     <footer
+      className="h-6 bg-surface-2 border-t border-line px-3 flex items-center justify-between text-[11px] text-fg-muted select-none shrink-0"
       data-testid="status-bar"
-      className="flex h-6 w-full items-center justify-between border-t border-line bg-surface-2 px-3 font-mono text-[11px] text-fg-muted select-none"
     >
-      {/* Left: Engine Summary */}
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-1.5">
-          <span
-            className={`h-1.5 w-1.5 rounded-full ${
-              engineStatus === "ready"
-                ? "bg-emerald-500"
-                : engineStatus === "running"
-                  ? "bg-blue-500 animate-pulse"
-                  : engineStatus === "booting"
-                    ? "bg-amber-500 animate-pulse"
-                    : "bg-neutral-400"
-            }`}
-          />
-          <span>Python 3.14 (Pyodide)</span>
-        </div>
-        <span>·</span>
-        <span>numpy 2.4.3</span>
-        <span>·</span>
-        <span>scipy 1.17.1</span>
+      <div className="flex items-center gap-3 min-w-0">
+        <span className="flex items-center gap-1.5 font-medium text-fg">
+          <Cpu className="w-3 h-3 text-brand" />
+          IIT (ISM) Virtual Lab · Circuit Maker & AC/DC Solver
+        </span>
+        <span className="hidden sm:inline text-fg-subtle">|</span>
+        <span className="hidden sm:inline font-mono">
+          {experimentId} · {wires.length} wires · Tool: {activeTool}
+        </span>
+        {unsavedChanges && (
+          <span className="text-amber-500 font-medium hidden md:inline">• Draft modified</span>
+        )}
       </div>
 
-      {/* Right: Cursor, Storage status, Run timing */}
-      <div className="flex items-center gap-3">
-        {lastRunElapsedMs !== null && (
-          <>
-            <span>Last run: {Math.round(lastRunElapsedMs)} ms</span>
-            <span>·</span>
-          </>
+      <div className="flex items-center gap-3 shrink-0">
+        {conn && (
+          <span
+            className={`flex items-center gap-1 font-medium ${
+              conn.valid
+                ? "text-emerald-600 dark:text-emerald-400"
+                : conn.status === "open_switch"
+                  ? "text-amber-600 dark:text-amber-400"
+                  : "text-danger-500"
+            }`}
+          >
+            <Activity className="w-3 h-3" />
+            {conn.title}
+          </span>
         )}
-        <span>
-          Ln {cursorPosition.lineNumber}, Col {cursorPosition.column}
-        </span>
-        <span>·</span>
-        <span
-          className={unsavedChanges ? "text-amber-500" : "text-emerald-600 dark:text-emerald-400"}
-        >
-          {unsavedChanges ? "Draft unsaved" : "Draft saved (IndexedDB)"}
-        </span>
+        {lastRunElapsedMs !== null && (
+          <span className="font-mono text-fg-subtle">{lastRunElapsedMs} ms</span>
+        )}
       </div>
     </footer>
   );
-};
+}
